@@ -1,12 +1,10 @@
-import './App.css';
+import './css/App.css';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1 className="text-2xl font-bold underline">
-          오늘의 개-그
-        </h1>
+      <a href="/jsx/Joke">오늘의 개-그</a>
       </header>
     </div>
   );
