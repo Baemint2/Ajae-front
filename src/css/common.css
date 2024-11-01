@@ -23,7 +23,7 @@ html {
 
 main {
     display: flex;
-    height: 700px;
+    height: 500px;
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
