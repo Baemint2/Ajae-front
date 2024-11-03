@@ -14,7 +14,9 @@ import Layout from './jsx/layout';
 import Joke from './jsx/Joke';
 import Login from './jsx/Login';
 import AddJoke from './jsx/AddJoke';
-import AnotherJoke from './jsx/AnotherJoke';
+import UserJoke from './jsx/UserJoke';
+import MyBookmark from './jsx/MyBookmark';
+import UserJokeDetail from "./jsx/UserJokeDetail";
 
 const router = createBrowserRouter([
   {
@@ -29,6 +31,18 @@ const router = createBrowserRouter([
         path: "/addJoke",
         element: <AddJoke />
       },
+      {
+        path: "/myBookmark",
+        element: <MyBookmark />
+      },
+      {
+        path: "/userJoke",
+        element: <UserJoke />
+      },
+      {
+        path: "/userJoke/:id",
+        element: <UserJokeDetail />
+      }
     ],
   },
   {
@@ -39,17 +53,12 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />
   },
-  
-  {
-    path: "/anotherJoke",
-    element: <AnotherJoke />
-  },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} /> {/* RouterProvider로 router 전달 */}
+    <RouterProvider router={router} />
   </React.StrictMode>
 );
 

@@ -1,4 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import {Link} from "react-router-dom";
+import YellowStar from "../img/yellow_star.png";
+import EmptyStar from "../img/empty_star.png";
+
 
 const Joke = () => {
     const [joke, setJoke] = useState({question: '', answer: '', date: ''});
@@ -74,13 +78,13 @@ const Joke = () => {
                     </button>
                     )}
                     <div className="another-joke-wrap">
-                        <a href="/src/jsx/AnotherJoke" className="text-cyan-400">다른 개그를 보러 가실래요?</a>
+                        <Link to="/userJoke" className="text-cyan-400">다른 개그를 보러 가실래요?</Link>
                     </div>
                 </div>
                 <div className="bookmark-wrap border-t-2"> {isBookmarked ? (
-                    <img className="yello_start" src="/img/yellow_star.png" alt="노란별"></img>
+                    <img className="yello_start" src={YellowStar} alt="노란별"></img>
                 ) : (
-                    <img className="empty_star" src="/img/empty_star.png" alt="빈 별" onClick={handleBookmark}/>
+                    <img className="empty_star" src={EmptyStar} alt="빈 별" onClick={handleBookmark}/>
                 )}
                 </div>
             </div>

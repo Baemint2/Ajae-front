@@ -1,8 +1,10 @@
 import React from "react";
+import {Link} from "react-router-dom";
+
 const Sidebar = React.forwardRef(({isOpen, onclose, loggedin, userInfo}, ref) => {
     return (
         <aside ref={ref}>
-             <div className="joke">
+             <div className="sidebar">
                             <div className={`fixed top-0 right-0 h-full ${isOpen ? 'w-64' : 'w-0'} bg-gray-800 overflow-hidden transition-all duration-300`} id="sidebar">
                     <button className="absolute top-4 left-4 text-white text-2xl"
                      id="close-button"
@@ -25,12 +27,25 @@ const Sidebar = React.forwardRef(({isOpen, onclose, loggedin, userInfo}, ref) =>
                     <div className="user-wrap"></div>
                     <ul className="mt-16 space-y-4 text-white">
                         {loggedin ? (
-                            <li><a href="/logout" id="logout" className="block px-4 py-2 hover:bg-gray-700">로그아웃</a></li>
+                            <>
+                                <li>
+                                    <Link to="/logout" id="logout" className="block px-4 py-2 hover:bg-gray-700">로그아웃</Link>
+                                </li>
+                                <li>
+                                    <Link to="/AddJoke" className="block px-4 py-2 hover:bg-gray-700">개그 추가하러가기</Link>
+                                </li>
+                                <li>
+                                    <Link to="/myBookmark" className="block px-4 py-2 hover:bg-gray-700">내 북마크</Link>
+                                </li>
+                            </>
                         ) : (
-                            <li><a href="/src/jsx/Login" id="login" className="block px-4 py-2 hover:bg-gray-700">로그인</a></li>
+                            <>
+                                <li>
+                                    <Link to="/Login" id="login" className="block px-4 py-2 hover:bg-gray-700">로그인</Link>
+                                </li>
+                            </>
                         )}
-                        <li><a href="/src/jsx/AddJoke" className="block px-4 py-2 hover:bg-gray-700">개그 추가하러가기</a></li>
-                        <li><a href="/myBookmark" className="block px-4 py-2 hover:bg-gray-700">내 북마크</a></li>
+
                     </ul>
                 </div>
             </div>

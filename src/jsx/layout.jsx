@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
-import { Outlet } from "react-router-dom";
+import {Outlet, useLocation} from "react-router-dom";
 
 
 const Layout = () => {
@@ -9,6 +9,7 @@ const Layout = () => {
     const [userInfo, setUserInfo] = useState(null);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const sidebarRef = useRef(null); // 사이드바 요소 참조
+    const location = useLocation();
 
     const openSidebar = () => setSidebarOpen(true);
     const closeSidebar = () => setSidebarOpen(false);
@@ -22,8 +23,9 @@ const Layout = () => {
 
     document.addEventListener("mousedown", handleClickOutside);
 
+        closeSidebar();
     return () => document.removeEventListener("mousedown", handleClickOutside);
-    })
+    }, [location])
 
     useEffect(() => {
         checkLoginStatus();
@@ -65,12 +67,12 @@ const Layout = () => {
         <div>
             <Navbar onMenuClick={openSidebar}/>
             <main>
-            <Sidebar ref={sidebarRef} 
-                     isOpen={isSidebarOpen} 
-                     onClose={closeSidebar} 
-                     loggedin={isLoggedIn}
-                     userInfo={userInfo}/>
-            <Outlet />
+                <Sidebar ref={sidebarRef}
+                         isOpen={isSidebarOpen}
+                         onClose={closeSidebar}
+                         loggedin={isLoggedIn}
+                         userInfo={userInfo}/>
+                <Outlet />
             </main>
         </div>
     )
