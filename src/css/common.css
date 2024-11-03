@@ -27,7 +27,10 @@ main {
     justify-content: center;
     align-items: center;
     box-sizing: border-box;
-    flex-grow: 1;
+}
+
+main>div {
+    width: 300px;
 }
 
 .login-container img {

@@ -19,15 +19,16 @@
     margin-bottom: 15px;
 }
 
-.user-wrap {
+.sidebar .user-wrap {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
 }
 
-.user-img {
+.sidebar .user-img {
     width: 50px;
     height: 50px;
     margin-top: 10px;
     border-radius: 50%;
 }
+
