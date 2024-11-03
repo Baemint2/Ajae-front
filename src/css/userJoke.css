@@ -1,0 +1,53 @@
+
+/* 유저 wrap flex 잡기*/
+.another-joke .user-wrap,
+.user-joke-detail .user-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/*유저 프로필사진 스타일*/
+.another-joke .user-wrap img,
+.user-joke-detail .user-wrap img{
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.another-joke .user-wrap span,
+.user-joke-detail .user-wrap span{
+    font-size: 1.2rem;
+}
+
+/* 유저 개그 문제 스타일 */
+.another-joke .question,
+.user-joke-detail .question-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+}
+
+.another-joke .temp {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    margin: 0 10px 5px 0;
+}
+
+.user-joke-detail .answer {
+    font-size: 1.5rem;
+    width: 80px;
+    text-align: center;
+    padding: 3px;
+}
+
+.user-joke-detail .open-answer {
+    font-size: 1.5rem;
+    width: 80px;
+    color: white;
+    padding: 3px;
+    align-items: center;
+}
