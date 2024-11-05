@@ -4,6 +4,7 @@ import {
   createBrowserRouter,
   RouterProvider,
 } from "react-router-dom";
+import { UserProvider } from './jsx/UserContext';
 import './css/index.css';
 import './css/joke.css';
 import './css/common.css';
@@ -15,8 +16,8 @@ import Joke from './jsx/Joke';
 import Login from './jsx/Login';
 import AddJoke from './jsx/AddJoke';
 import UserJoke from './jsx/UserJoke';
-import MyBookmark from './jsx/MyBookmark';
 import UserJokeDetail from "./jsx/UserJokeDetail";
+import MyPage from './jsx/MyPage';
 
 const router = createBrowserRouter([
   {
@@ -32,16 +33,16 @@ const router = createBrowserRouter([
         element: <AddJoke />
       },
       {
-        path: "/myBookmark",
-        element: <MyBookmark />
-      },
-      {
         path: "/userJoke",
         element: <UserJoke />
       },
       {
         path: "/userJoke/:id",
         element: <UserJokeDetail />
+      },
+      {
+        path: "/myPage",
+        element: <MyPage />
       }
     ],
   },
@@ -58,7 +59,9 @@ const router = createBrowserRouter([
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <RouterProvider router={router} />
+    <UserProvider>
+      <RouterProvider router={router} />
+    </UserProvider>
   </React.StrictMode>
 );
 
