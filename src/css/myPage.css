@@ -1,0 +1,59 @@
+/* 마이페이지 유저정보 스타일 */
+.my-page .top-layout .profile-wrap{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+/* 유저정보 이미지 */
+.my-page .profile-wrap img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 10px;
+}
+
+/* 유저정보 이름 */
+.my-page .profile-wrap span {
+    font-size: 1.5rem;
+}
+
+/* 탭 스타일 */
+.my-page .active-tap {
+    display: flex;
+    font-size: 1.3rem;
+    padding: 10px;
+}
+
+/* 북마크, 추가한 개그 렌더링되는 레이아웃 스타일 */
+.my-page .bottom-layout {
+    height: 300px;
+}
+
+/* 탭 버튼 활성화시 스타일  */
+.my-page .active-tap .active {
+    color: rgb(0 144 249);
+}
+
+/* 마이페이지 북마크 */
+.my-page .my-bookmark {
+    display: flex;
+    flex-direction: column;
+    font-size: 1.3rem;
+}
+
+/* 마이페이지 북마크 개그 스타일 */
+.my-page .my-bookmark .joke-wrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 5px;
+}
+
+/* 마이페이지 북마크 삭제버튼 스타일 */
+.my-page .my-bookmark .delete-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+    margin: 5px;
+}

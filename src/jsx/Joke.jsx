@@ -59,11 +59,11 @@ const Joke = () => {
     };
 
     return (
-        <div>
+        <div className="joke">
             <h1 className="text-3xl font-bold">오늘의 아재 개-그</h1>
             <div id="joke-container" className="border border-sky-400 rounded-3xl">
                 <div className="mb-15">
-                    <div className="question-wrap">
+                    <div className="joke-wrap">
                         <span id="question">Q. {joke.question}</span>
                         {showAnswer && <span id="answer" className="mb-5" >A. {joke.answer}</span>}
                     </div>

@@ -31,7 +31,7 @@ const UserJoke = () => {
             <h1 className="text-3xl font-bold">유저들의 개-그</h1>
             {userJoke.map((item, index) => (
             <div className="border border-sky-400 rounded-3xl mb-10"  key={index}
-                 onClick={() => jokeClick(item.joke.id, item.user.id)}>
+                 onClick={() => jokeClick(item.joke.jokeId, item.user.id)}>
                 <div className="user-wrap">
                     <img src={item.user.profile} alt="유저 프로필 사진" className="mx-5 my-5"></img>
                     <span>{item.user.nickname}</span>

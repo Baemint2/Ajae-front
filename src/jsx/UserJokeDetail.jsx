@@ -37,7 +37,7 @@ const UserJokeDetail = () => {
                     {userJoke.user?.profile ? (
                         <>
                             <div className="user-wrap">
-                                <img alt="프로필 사진" src={userJoke.user.profile}/>
+                                <img alt="프로필 사진" src={userJoke.user.profile} className="mx-5 my-5"/>
                                 <span>{userJoke.user.nickname}</span>
                             </div>
                             <div className="question-wrap">
