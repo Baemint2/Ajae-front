@@ -5,7 +5,7 @@ import EmptyStar from "../img/empty_star.png";
 
 
 const Joke = () => {
-    const [joke, setJoke] = useState({question: '', answer: '', date: ''});
+    const [joke, setJoke] = useState({});
     const [showAnswer, setShowAnswer] = useState(false); // 정답 보기 상태 관리
     const [isBookmarked, setIsBookmarked] = useState(false);
 
@@ -27,7 +27,7 @@ const Joke = () => {
             .then(response => response.json())
             .then(data => {
                 const today = new Date().toLocaleDateString();
-                const newJoke = { question: data.question, answer: data.answer, date: today };
+                const newJoke = { id: data.jokeId, question: data.question, answer: data.answer, date: today };
                 setJoke(newJoke);
                 localStorage.setItem("dailyJoke", JSON.stringify(newJoke));
             });
