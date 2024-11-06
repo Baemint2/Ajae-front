@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import {
   createBrowserRouter,
   RouterProvider,
+  Navigate,
 } from "react-router-dom";
 import { UserProvider } from './jsx/UserContext';
 import './css/index.css';
@@ -22,10 +23,22 @@ import MyPage from './jsx/MyPage';
 const router = createBrowserRouter([
   {
     path: "",
-    element: <Layout />, // Layout 컴포넌트를 루트 경로에 사용
+    element: <Navigate to="/index" replace={true} />, // 루트 경로에서 /index로 리디렉트
+  },
+  {
+    path: "/index",
+    element: <App />,
+  },
+  {
+    path: "/login",
+    element: <Login />
+  },
+  {
+    path: "/",
+    element: <Layout />,
     children: [
       {
-        path: "/joke", // /joke 경로에 Joke 컴포넌트 연결
+        path: "/joke",
         element: <Joke />,
       },
       {
@@ -46,23 +59,13 @@ const router = createBrowserRouter([
       }
     ],
   },
-  {
-    path: "/index", // 루트 경로에 App 컴포넌트 연결
-    element: <App />,
-  },
-  {
-    path: "/login",
-    element: <Login />
-  },
 ]);
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
     <UserProvider>
       <RouterProvider router={router} />
     </UserProvider>
-  </React.StrictMode>
 );
 
 reportWebVitals();
