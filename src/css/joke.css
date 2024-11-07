@@ -26,6 +26,7 @@
 
 .joke button {
     font-size: 1.7rem;
+    background-color: var(--main-color);
 }
 
 .joke h1 {

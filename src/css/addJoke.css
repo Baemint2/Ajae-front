@@ -24,13 +24,19 @@
     font-size: 1.5rem;
     width: 100px;
     height: 30px;
-    background-color: #e8bf21;
+    background-color: var(--main-color);
     border-radius: 5px;
+    color: #fff;
+}
+
+.add-joke .joke-form .cancel-btn {
+    background-color: var(--sub-color);
     color: #000;
 }
 
 .add-joke .joke-form .btn-wrap {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: space-between;
 }

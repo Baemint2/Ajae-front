@@ -4,6 +4,8 @@
 
 :root {
     font-size: 10px;
+    --main-color: #0E7490;
+    --sub-color: #BFC8CA;
 }
 
 @font-face {

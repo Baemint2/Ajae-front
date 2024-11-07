@@ -1,27 +1,49 @@
 
 /* 유저 wrap flex 잡기*/
-.another-joke .user-wrap,
+.user-joke .user-wrap,
 .user-joke-detail .user-wrap {
     display: flex;
     flex-direction: row;
     align-items: center;
 }
 
+/* h1, span 스타일 조정 */
+.user-joke .title-wrap {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.user-joke .title-wrap button {
+    font-size: 1.3rem;
+    width: 100px;
+    height: 30px;
+    border-radius: 5px;
+    color: white;
+    padding: 3px;
+}
+
+.user-joke .joke-wrap {
+    height: 400px;
+    overflow: auto;
+}
+
 /*유저 프로필사진 스타일*/
-.another-joke .user-wrap img,
+.user-joke .user-wrap img,
 .user-joke-detail .user-wrap img{
-    width: 40px;
-    height: 40px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
 }
 
-.another-joke .user-wrap span,
+.user-joke .user-wrap span,
 .user-joke-detail .user-wrap span{
     font-size: 1.2rem;
 }
 
 /* 유저 개그 문제 스타일 */
-.another-joke .question,
+.user-joke .question,
 .user-joke-detail .question-wrap {
     display: flex;
     flex-direction: column;
@@ -30,11 +52,17 @@
     margin-bottom: 10px;
 }
 
-.another-joke .temp {
+.user-joke .temp {
     display: flex;
     flex-direction: column;
     align-items: end;
     margin: 0 10px 5px 0;
+}
+
+.user-joke .page-btn {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .user-joke-detail .answer {
@@ -47,6 +75,7 @@
 .user-joke-detail .open-answer {
     font-size: 1.5rem;
     width: 80px;
+    background-color: var(--main-color);
     color: white;
     padding: 3px;
     align-items: center;

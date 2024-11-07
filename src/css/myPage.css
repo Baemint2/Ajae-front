@@ -25,6 +25,12 @@
     padding: 10px;
 }
 
+.my-page .active-tap > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 /* 북마크, 추가한 개그 렌더링되는 레이아웃 스타일 */
 .my-page .bottom-layout {
     height: 300px;
