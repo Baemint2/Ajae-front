@@ -37,7 +37,8 @@ const AddJoke = () => {
                     <input type="text" id="answer" className="answer" name="answer"></input>
                 </div>
                 <div className="btn-wrap">
-                <button type="button" onClick={() => saveJoke()}>개그 추가하기</button>
+                    <button type="button" className="cancel-btn"  onClick={() => navigate("/userJoke")}>취소</button>
+                    <button type="button" onClick={() => saveJoke()}>개그 추가하기</button>
                 </div>
             </form>
         </div>

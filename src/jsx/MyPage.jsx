@@ -7,11 +7,13 @@ const MyPage = () => {
     const [activeTab, setActiveTab] = useState("bookmarks");
     const [bookmark, setBookmark] = useState([]);
     const [joke, setJoke] = useState([]);
+    const [jokeCount, setJokeCount] = useState(0);
     const [isEmpty, setIsEmpty] = useState({});
 
     useEffect(() => {
         if (user) {
             loadTabData(activeTab);
+            userJokeCount();
         }
     }, [user, activeTab]);
 
@@ -48,6 +50,13 @@ const MyPage = () => {
         setJoke(data);
     }
 
+    const userJokeCount = async () => {
+        const response = await fetch("/api/v1/userJoke/count");
+        const data = await response.json();
+        console.log(data);
+        setJokeCount(data);
+    }
+
     const deleteBookmark = async (id) => {
         const body = {jokeId: id};
         const response = await fetch("/api/v1/bookmark" , {
@@ -76,21 +85,27 @@ const MyPage = () => {
                             <span>{user.nickname}</span>
                         </>
                     ) : (
-                        <span>사용자 정보가 없습니다.</span>
+                        <span></span>
                     )}
                 </div>
                 <div className="active-tap border-t">
-                    <span className={`mr-5 ${activeTab === "bookmarks" ? "active" : ""}`}
-                          onClick={() => toggleTab("bookmarks")}>내 북마크</span>
-                    <span className={`${activeTab === "addedJokes" ? "active" : ""}`}
-                          onClick={() => toggleTab("addedJokes")}>추가한 개그</span>
+                    <div>
+                        <span>test</span>
+                        <span className={`mr-5 ${activeTab === "bookmarks" ? "active" : ""}`}
+                              onClick={() => toggleTab("bookmarks")}>내 북마크</span>
+                    </div>
+                    <div>
+                        <span>{jokeCount}</span>
+                        <span className={`${activeTab === "added-jokes" ? "active" : ""}`}
+                              onClick={() => toggleTab("added-jokes")}>추가한 개그</span>
+                    </div>
                 </div>
             </div>
             <div className="bottom-layout">
                 {activeTab === "bookmarks" && (
                     <JokeList jokes={bookmark} isEmptyMessage={isEmpty.message} deleteBookmark={deleteBookmark}/>
                 )}
-                {activeTab === "addedJokes" && (
+                {activeTab === "added-jokes" && (
                     <JokeList jokes={joke} isEmptyMessage="유저 개그가 없습니다." deleteBookmark={deleteBookmark}/>
                 )}
             </div>

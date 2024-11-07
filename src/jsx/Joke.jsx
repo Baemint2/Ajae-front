@@ -71,7 +71,7 @@ const Joke = () => {
                     <button 
                         type="button" 
                         id="openAnswer" 
-                        className="openAnswer text-2xl w-40 h-10 bg-cyan-700 text-white mb-5" 
+                        className="openAnswer text-2xl w-40 h-10 text-white mb-5"
                         onClick={() => setShowAnswer(true)}
                     >
                         정답보기

@@ -94,9 +94,6 @@ const Sidebar = React.forwardRef(({isOpen, onclose}, ref) => {
                                           onClick={() => logout()}>로그아웃</span>
                                 </li>
                                 <li>
-                                    <Link to="/AddJoke" className="block px-4 py-2 hover:bg-gray-700">개그 추가하러가기</Link>
-                                </li>
-                                <li>
                                     <Link to="/myPage" className="block px-4 py-2 hover:bg-gray-700">마이 페이지</Link>
                                 </li>
                             </>
