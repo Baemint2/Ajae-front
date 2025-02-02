@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import {Outlet, useLocation} from "react-router-dom";
@@ -6,15 +6,15 @@ import {Outlet, useLocation} from "react-router-dom";
 
 const Layout = () => {
     const [isSidebarOpen, setSidebarOpen] = useState(false);
-    const sidebarRef = useRef(null); // 사이드바 요소 참조
+    const sidebarRef = useRef<HTMLInputElement | null>(null); // 사이드바 요소 참조
     const location = useLocation();
 
     const openSidebar = () => setSidebarOpen(true);
     const closeSidebar = () => setSidebarOpen(false);
 
     useEffect(() => {
-    const handleClickOutside = (event) => {
-        if (sidebarRef.current && !sidebarRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+        if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
             closeSidebar();
         }
     };

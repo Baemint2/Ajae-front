@@ -3,18 +3,35 @@ import { useParams, useNavigate } from "react-router-dom";
 import "../css/userJoke.css";
 import {timeSetting} from "../timeUtils";
 
+interface User {
+    id: number;
+    nickname: string;
+    profile: string;
+}
+
+interface Joke {
+    jokeId: number;
+    question: string;
+    answer: string;
+    createdAt: string;
+}
+
+interface UserJokeData {
+        joke: Joke;
+        user: User;
+}
+
 
 const UserJokeDetail = () => {
-
     const params = useParams();
-
-    const [userJoke, setUserJoke] = useState({});
+    const [userJoke, setUserJoke] = useState<UserJokeData | null>();
     const [showAnswer, setShowAnswer] = useState(false); // 정답 보기 상태 관리
     const pageNo = localStorage.getItem("pageNo");
     const navigate = useNavigate();
 
     useEffect(() => {
         getUserJokeDetail(params.id);
+        fetchExistsUserJoke();
     },[params.id])
 
     const body = {
@@ -22,7 +39,7 @@ const UserJokeDetail = () => {
         userId: localStorage.getItem("userId")
     }
 
-    const getUserJokeDetail = () => {
+    const getUserJokeDetail = (id: string | undefined) => {
         fetch(`/api/v1/userJoke`, {
             method: "POST",
             headers: {"Content-Type": "application/json" },
@@ -34,15 +51,35 @@ const UserJokeDetail = () => {
             })
     }
 
+    const fetchExistsUserJoke = async () => {
+        console.log(params.id);
+        const body = {
+            jokeId: params.id
+        }
+        const response = await fetch(`/api/v1/userJoke/check`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json" },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        console.log(data);
+    }
+
     return (
         <div className="user-joke-detail">
             <div className="border border-sky-400 rounded-3xl mb-10">
-                {userJoke.user ? (
+                {userJoke ? (
                     <>
-                        <div className="user-wrap">
-                            <img alt="프로필 사진" src={userJoke.user.profile} className="mx-5 my-5"/>
-                            <span>{userJoke.user.nickname}</span>
-                            <span className="ml-4">{timeSetting(userJoke.joke.createdAt)}</span>
+                        <div className="header">
+                            <div className="user-wrap">
+                                <img alt="프로필 사진" src={userJoke.user.profile} className="mx-5 my-5"/>
+                                <span>{userJoke.user.nickname}</span>
+                                <span className="ml-4">{timeSetting(userJoke.joke.createdAt)}</span>
+                            </div>
+                            <div>
+                                <button>수정</button>
+                                <button className="mx-4 delete-btn">삭제</button>
+                            </div>
                         </div>
                         <div className="question-wrap">
                             <span className="question mb-4">Q. {userJoke.joke.question}</span>

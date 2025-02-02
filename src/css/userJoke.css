@@ -1,4 +1,11 @@
 
+.user-joke-detail .header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
 /* 유저 wrap flex 잡기*/
 .user-joke .user-wrap,
 .user-joke-detail .user-wrap {
@@ -7,8 +14,22 @@
     align-items: center;
 }
 
+.user-joke-detail .header button {
+    font-size: 1.3rem;
+    background-color: var(--main-color);
+    color: #fff;
+    width: 35px;
+    height: 25px;
+}
+
+.user-joke-detail .header .delete-btn {
+    background-color: var(--sub-color);
+    color: #000;
+}
+
 /* h1, span 스타일 조정 */
 .user-joke .title-wrap {
+    margin-top: 70px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -25,8 +46,9 @@
 }
 
 .user-joke .joke-wrap {
-    height: 400px;
+    height: 460px;
     overflow: auto;
+    margin-top: 15px;
 }
 
 /*유저 프로필사진 스타일*/

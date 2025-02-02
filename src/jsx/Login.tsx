@@ -3,9 +3,26 @@ import kakaoLogin from "../img/kakao_login_medium_narrow.png";
 import googleLogin from "../img/web_light_sq_SI@2x.png";
 
 const Login = () => {
-    const handleLogin = (provider) => {
+    const handleLogin = (provider: string) => {
         window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
     }
+
+    const handleLogin2 = () => {
+        const data = new URLSearchParams({
+            username: "testUsername",
+            password: "1234",
+        });
+        fetch("http://localhost:8080/login", {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            method: "post",
+            body: data
+        }).then((response) => {
+            console.log(response)
+            window.location.href = "/"
+        })
+    };
 
     return (
 
@@ -18,6 +35,13 @@ const Login = () => {
                  </img>
             <img id="naver-login" src={naverLogin} alt="네이버 로그인" onClick={() => handleLogin("naver")}></img>
             <img id="google-login" src={googleLogin} alt="구글 로그인" onClick={() => handleLogin("google")}></img>
+            <form onSubmit={(e) => e.preventDefault()}>
+                <label>아이디</label>
+                <input name={"username"}/>
+                <label>비밀번호</label>
+                <input name={"password"}/>
+                <button onClick={handleLogin2}>로그인</button>
+            </form>
         </div>
     )
 }

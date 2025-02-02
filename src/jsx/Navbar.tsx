@@ -2,7 +2,11 @@ import logo from "../img/humor_spoon.jpeg";
 import menuIcon from "../img/menu.png";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ( {onMenuClick} ) => {
+interface NavbarProps {
+    onMenuClick: () => void;
+}
+
+const Navbar: React.FC<NavbarProps> = ({onMenuClick}) => {
     const navigate = useNavigate();
 
     const index = () => {

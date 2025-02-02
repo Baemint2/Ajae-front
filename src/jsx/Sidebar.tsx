@@ -2,10 +2,21 @@ import React, {useEffect, useState} from "react";
 import {Link, useNavigate } from "react-router-dom";
 import {useUser} from "./UserContext"
 
-const Sidebar = React.forwardRef(({isOpen, onclose}, ref) => {
+interface IUserInfo {
+    profile?: string;
+    username: string;
+    email: string;
+}
+
+interface SidebarProps {
+    isOpen: boolean;
+    onClose: () => void;
+}
+
+const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(({isOpen, onClose}, ref) => {
     const navigate = useNavigate();
     const [isLoggedIn, setIsLoggedIn] = useState(false);
-    const [userInfo, setUserInfo] = useState(null);
+    const [userInfo, setUserInfo] = useState<IUserInfo | null>(null);
     // eslint-disable-next-line react-hooks/rules-of-hooks
     const {setUser} = useUser();
 
@@ -19,6 +30,7 @@ const Sidebar = React.forwardRef(({isOpen, onclose}, ref) => {
         if (isLoggedIn) {
             getUserInfo();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isLoggedIn]);
 
     const checkLoginStatus = async () => {
@@ -68,7 +80,7 @@ const Sidebar = React.forwardRef(({isOpen, onclose}, ref) => {
                         <div className={`fixed top-0 right-0 h-full ${isOpen ? 'w-64' : 'w-0'} bg-gray-800 overflow-hidden transition-all duration-300`} id="sidebar">
                     <button className="absolute top-4 left-4 text-white text-2xl"
                      id="close-button"
-                     onClick={onclose}>&times;
+                     onClick={onClose}>&times;
                      </button>
                      <div className="user-wrap">
                         {isLoggedIn ? (

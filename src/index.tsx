@@ -10,20 +10,22 @@ import './css/index.css';
 import './css/joke.css';
 import './css/common.css';
 import './css/layout.css';
+import 'flowbite'
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import Layout from './jsx/layout';
-import Joke from './jsx/Joke';
+import Joke from './jsx/IJoke';
 import Login from './jsx/Login';
 import AddJoke from './jsx/AddJoke';
 import UserJoke from './jsx/UserJoke';
 import UserJokeDetail from "./jsx/UserJokeDetail";
 import MyPage from './jsx/MyPage';
+import Chat from "./jsx/Chat";
 
 const router = createBrowserRouter([
   {
     path: "",
-    element: <Navigate to="/index" replace={true} />, // 루트 경로에서 /index로 리디렉트
+    element: <Navigate to="/index" replace={true} />,
   },
   {
     path: "/index",
@@ -56,12 +58,18 @@ const router = createBrowserRouter([
       {
         path: "/myPage",
         element: <MyPage />
-      }
+      },
     ],
   },
+  {
+    path: "/chat",
+    element: <Chat />
+  }
 ]);
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const rootElement = document.getElementById('root');
+if (!rootElement) throw new Error('Failed to find the root element');
+const root = ReactDOM.createRoot(rootElement);
 root.render(
     <UserProvider>
       <RouterProvider router={router} />

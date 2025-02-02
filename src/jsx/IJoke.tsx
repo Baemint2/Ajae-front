@@ -4,22 +4,30 @@ import YellowStar from "../img/yellow_star.png";
 import EmptyStar from "../img/empty_star.png";
 
 
+interface IJoke {
+    question: String;
+    answer: String;
+    id: number;
+    date: String;
+}
+
 const Joke = () => {
-    const [joke, setJoke] = useState({});
+    const [joke, setJoke] = useState<IJoke | null>(null);
     const [showAnswer, setShowAnswer] = useState(false); // 정답 보기 상태 관리
     const [isBookmarked, setIsBookmarked] = useState(false);
 
     useEffect(() => {
         const today = new Date().toLocaleDateString();
-        const savedJoke = JSON.parse(localStorage.getItem("dailyJoke"));
+        const savedJoke = localStorage.getItem("dailyJoke");
+        const parsedJoke: IJoke | null = savedJoke ? JSON.parse(savedJoke) as IJoke : null;
 
-        if(!savedJoke || savedJoke.date !== today) {
+        if(!savedJoke || parsedJoke!.date !== today) {
             fetchJoke();
         } else {
-            setJoke(savedJoke);
+            setJoke(parsedJoke);
         }
 
-        checkBookmark(savedJoke);
+        checkBookmark(parsedJoke);
     }, []);
 
     const fetchJoke = () => {
@@ -33,7 +41,7 @@ const Joke = () => {
             });
     };
 
-    const checkBookmark = (jokeData) => {
+    const checkBookmark = (jokeData: IJoke | null) => {
         fetch("/api/v1/check", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -64,8 +72,8 @@ const Joke = () => {
             <div id="joke-container" className="border border-sky-400 rounded-3xl">
                 <div className="mb-15">
                     <div className="joke-wrap">
-                        <span id="question">Q. {joke.question}</span>
-                        {showAnswer && <span id="answer" className="mb-5" >A. {joke.answer}</span>}
+                        <span id="question">Q. {joke?.question}</span>
+                        {showAnswer && <span id="answer" className="mb-5" >A. {joke?.answer}</span>}
                     </div>
                     {!showAnswer && (
                     <button 
