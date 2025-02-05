@@ -4,10 +4,12 @@ import anonymous from "../img/anonymous.png"
 import menu from "../img/menu.png"
 import messageImg from "../img/message.png"
 import question from "../img/question.png"
-import {useRef, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import sockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs";
 import MessageItem from "./MessageItem";
+import ChatRoomList from "./ChatRoomList";
+import {useUser} from "./UserContext";
 
 interface Message {
     msgId: number;
@@ -20,14 +22,80 @@ interface Message {
     chatRoomNo: number;
 }
 
+interface IUserInfo {
+    profile?: string;
+    username: string;
+    email: string;
+    nickname?: string;
+}
+
+interface IChatRoomInfo {
+    chatRoomId: number;
+    chatRoomTitle?: string;
+    createdAt: string;
+    creator: string;
+    participantUsers: string
+    updatedAt?: string
+}
 
 const Chat = () => {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const rightSidebarRef = useRef<HTMLDivElement>(null);
     const midChatRef = useRef<HTMLDivElement>(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userInfo, setUserInfo] = useState<IUserInfo | null>(null);
+    const [chatRooms, setChatRooms] = useState<IChatRoomInfo[]>([]);
+    const {setUser} = useUser();
+    const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
 
-    const socket = new sockJS("http://localhost:8080/chat");
+
+    useEffect(() => {
+        getUserInfo();
+    }, []);
+
+    useEffect(() => {
+        console.log('56')
+        console.log(userInfo?.username)
+        if (userInfo?.username) {
+            getChatRoom();
+        }
+    }, [userInfo]);
+
+    useEffect(() => {
+        console.log("Updated chatRooms state:", chatRooms);
+    }, [chatRooms]);  // ✅ chatRooms가 변경될 때마다 실행
+
+
+
+    const getUserInfo = async () => {
+        const getCookie = (name: String) => {
+            const cookies = document.cookie.split("; ");
+            for (let cookie of cookies) {
+                const [key, value] = cookie.split("=");
+                if (key === name) return value;
+            }
+            return null;
+        };
+        try {
+            const response = await fetch(`http://localhost:8090/userInfo/${getCookie("username")}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) throw new Error("사용자 정보를 가져오지 못했습니다.");
+            const data = await response.json();
+            console.log(data)
+            setUser(data);
+            setUserInfo(data.second); // 사용자 정보 설정
+        } catch (error) {
+            console.error("사용자 정보 가져오기 오류:", error);
+        }
+    };
+
+    const socket = new sockJS("http://localhost:8090/chat");
 
     const stompClient = new Client({
         webSocketFactory: () => socket,
@@ -43,6 +111,7 @@ const Chat = () => {
         // });
     };
 
+    console.log(userInfo)
 
     stompClient.activate();
 
@@ -67,6 +136,19 @@ const Chat = () => {
         }
     };
 
+    const getChatRoom = async () => {
+        const response = await fetch(`http://localhost:8090/chatRoom/${userInfo?.username}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await response.json();
+        console.log(Array.isArray(data.chatRoom));
+        setChatRooms(data.chatRoom);
+    }
+
+
     const deleteMessage = () => {
         console.log("메시지 삭제")
     }
@@ -84,6 +166,16 @@ const Chat = () => {
             midChatRef.current.style.flexGrow = "1";
         }
     }
+
+    const loadMessages = (chatRoomNo: number) => {
+        console.log("Loading messages for room:", chatRoomNo);
+    };
+    const subscribeToParticipants = (chatRoomNo: number) => {
+        console.log("Subscribing to room:", chatRoomNo);
+    };
+    const updateUnreadMessageCounts = () => {
+        console.log("Updating unread messages");
+    };
 
     return (
         <div>
@@ -108,31 +200,39 @@ const Chat = () => {
                                                 <div>
                                                     <div>
                                                         <div className="msg-room-list" id="chatRoomList">
+                                                            <ChatRoomList
+                                                                chatRooms={chatRooms}
+                                                                loadMessages={loadMessages}
+                                                                currentChatRoomId={currentChatRoomId}
+                                                                subscribeToParticipants={subscribeToParticipants}
+                                                                updateUnreadMessageCounts={updateUnreadMessageCounts}
+                                                                setCurrentChatRoomId={setCurrentChatRoomId}
+                                                            />
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
 
-                                            {/*<div className="mid-intro">*/}
-                                            {/*    <div className="intro">*/}
-                                            {/*        <div>*/}
-                                            {/*            <div className="circle"></div>*/}
-                                            {/*            <img src={message} alt="메시지 아이콘"/>*/}
-                                            {/*        </div>*/}
-                                            {/*        <div>내 메시지</div>*/}
-                                            {/*        <div>친구나 그룹에 비공개 사진과 메시지를 보내보세요.</div>*/}
-                                            {/*        <a role="button" className="send-message" data-modal-target="default-modal" data-modal-toggle="default-modal">*/}
-                                            {/*            <div id="msg">메시지 보내기</div>*/}
-                                            {/*        </a>*/}
-                                            {/*    </div>*/}
-                                            {/*</div>*/}
+                                            <div className="mid-intro" style={{display: currentChatRoomId? "flex" : "none"}}>
+                                                <div className="intro">
+                                                    <div>
+                                                        <div className="circle"></div>
+                                                        <img src={message} alt="메시지 아이콘"/>
+                                                    </div>
+                                                    <div>내 메시지</div>
+                                                    <div>친구나 그룹에 사진과 메시지를 보내보세요.</div>
+                                                    <a role="button" className="send-message" data-modal-target="default-modal" data-modal-toggle="default-modal">
+                                                        <div id="msg">메시지 보내기</div>
+                                                    </a>
+                                                </div>
+                                            </div>
 
-                                            <div className="mid-chat" ref={midChatRef}>
+                                            <div className="mid-chat" ref={midChatRef} style={{display: currentChatRoomId? "none" : "flex"}}>
                                                 <div className="chat-name">
                                                     <div className="profile-image">
                                                         <div><img src={anonymous}/></div>
                                                     </div>
-                                                    <div id="chatName">절대고집</div>
+                                                    <div id="chatName">{userInfo?.nickname || '절대고집'}</div>
                                                     <div>검색</div>
                                                     <div>
                                                         <a role="button" id="toggleSidebar" onClick={toggleSideBar}><img src={menu} alt={"menu"}/></a>

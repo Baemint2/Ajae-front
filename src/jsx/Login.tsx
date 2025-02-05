@@ -7,21 +7,23 @@ const Login = () => {
         window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
     }
 
-    const handleLogin2 = () => {
+    const handleLogin2 = async () => {
         const data = new URLSearchParams({
-            username: "testUsername",
+            username: "moz1mozi",
             password: "1234",
         });
-        fetch("http://localhost:8080/login", {
+        const response = await fetch("http://localhost:8090/login", {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             method: "post",
-            body: data
-        }).then((response) => {
-            console.log(response)
-            window.location.href = "/"
-        })
+            body: data,
+            credentials: 'same-origin'
+        });
+        console.log(response);
+        window.location.href = response.url
+        // const test = await response.json();
+        // console.log(test)
     };
 
     return (

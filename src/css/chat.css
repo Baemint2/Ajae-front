@@ -327,7 +327,7 @@ main {
 }
 
 .message .mid-chat {
-    /*display: none;*/
+    display: none;
     flex-direction: column;
     justify-content: space-between;
     flex-grow: 1;
