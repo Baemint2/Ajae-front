@@ -49,6 +49,7 @@ const Chat = () => {
     const [chatRooms, setChatRooms] = useState<IChatRoomInfo[]>([]);
     const {setUser} = useUser();
     const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
 
     useEffect(() => {
@@ -67,6 +68,14 @@ const Chat = () => {
         console.log("Updated chatRooms state:", chatRooms);
     }, [chatRooms]);  // ✅ chatRooms가 변경될 때마다 실행
 
+
+    const openCreateModal = () => {
+        setIsCreateModalOpen(true);
+    }
+
+    const closeCreateModal = () => {
+        setIsCreateModalOpen(false);
+    }
 
 
     const getUserInfo = async () => {
@@ -111,8 +120,6 @@ const Chat = () => {
         //     console.log("서버로부터 메시지 수신: ", JSON.parse(message.body));
         // });
     };
-
-    console.log(userInfo)
 
     stompClient.activate();
 
@@ -219,17 +226,16 @@ const Chat = () => {
                                                 <div className="intro">
                                                     <div>
                                                         <div className="circle"></div>
-                                                        <img src={message} alt="메시지 아이콘"/>
+                                                        <img src={messageImg} alt="메시지 아이콘"/>
                                                     </div>
                                                     <div>내 메시지</div>
                                                     <div>친구나 그룹에 사진과 메시지를 보내보세요.</div>
-                                                    <a role="button" className="send-message"
-                                                       data-modal-target="default-modal"
-                                                       data-modal-toggle="default-modal">
-                                                        <div id="msg">메시지 보내기</div>
-                                                    </a>
+                                                        <button id="msg" onClick={openCreateModal} className="send-message">메시지 보내기</button>
                                                 </div>
                                             </div>
+
+                                            <CreateChatRoomModal isOpen={isCreateModalOpen} isClose={closeCreateModal}/>
+
 
                                             <div className="mid-chat" ref={midChatRef}
                                                  style={{display: currentChatRoomId ? "flex" : "none"}}>
@@ -303,7 +309,6 @@ const Chat = () => {
                                     </div>
                                 </div>
 
-                                <CreateChatRoomModal/>
 
 
                                 <div id="invite-modal" tabIndex={-1} aria-hidden="true"
