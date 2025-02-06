@@ -5,7 +5,7 @@ import {
   RouterProvider,
   Navigate,
 } from "react-router-dom";
-import { UserProvider } from './jsx/UserContext';
+import { UserProvider } from './tsx/UserContext';
 import './css/index.css';
 import './css/joke.css';
 import './css/common.css';
@@ -13,14 +13,14 @@ import './css/layout.css';
 import 'flowbite'
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import Layout from './jsx/layout';
-import Joke from './jsx/IJoke';
-import Login from './jsx/Login';
-import AddJoke from './jsx/AddJoke';
-import UserJoke from './jsx/UserJoke';
-import UserJokeDetail from "./jsx/UserJokeDetail";
-import MyPage from './jsx/MyPage';
-import Chat from "./jsx/Chat";
+import Layout from './tsx/layout';
+import Joke from './tsx/IJoke';
+import Login from './tsx/Login';
+import AddJoke from './tsx/AddJoke';
+import UserJoke from './tsx/UserJoke';
+import UserJokeDetail from "./tsx/UserJokeDetail";
+import MyPage from './tsx/MyPage';
+import Chat from "./tsx/Chat";
 
 const router = createBrowserRouter([
   {

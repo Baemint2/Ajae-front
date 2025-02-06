@@ -4,12 +4,13 @@ import anonymous from "../img/anonymous.png"
 import menu from "../img/menu.png"
 import messageImg from "../img/message.png"
 import question from "../img/question.png"
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import sockJS from "sockjs-client"
 import { Client } from "@stomp/stompjs";
 import MessageItem from "./MessageItem";
 import ChatRoomList from "./ChatRoomList";
 import {useUser} from "./UserContext";
+import CreateChatRoomModal from "./CreateChatRoomModal";
 
 interface Message {
     msgId: number;
@@ -213,7 +214,8 @@ const Chat = () => {
                                                 </div>
                                             </div>
 
-                                            <div className="mid-intro" style={{display: currentChatRoomId? "flex" : "none"}}>
+                                            <div className="mid-intro"
+                                                 style={{display: currentChatRoomId ? "none" : "flex"}}>
                                                 <div className="intro">
                                                     <div>
                                                         <div className="circle"></div>
@@ -221,13 +223,16 @@ const Chat = () => {
                                                     </div>
                                                     <div>내 메시지</div>
                                                     <div>친구나 그룹에 사진과 메시지를 보내보세요.</div>
-                                                    <a role="button" className="send-message" data-modal-target="default-modal" data-modal-toggle="default-modal">
+                                                    <a role="button" className="send-message"
+                                                       data-modal-target="default-modal"
+                                                       data-modal-toggle="default-modal">
                                                         <div id="msg">메시지 보내기</div>
                                                     </a>
                                                 </div>
                                             </div>
 
-                                            <div className="mid-chat" ref={midChatRef} style={{display: currentChatRoomId? "none" : "flex"}}>
+                                            <div className="mid-chat" ref={midChatRef}
+                                                 style={{display: currentChatRoomId ? "flex" : "none"}}>
                                                 <div className="chat-name">
                                                     <div className="profile-image">
                                                         <div><img src={anonymous}/></div>
@@ -235,19 +240,23 @@ const Chat = () => {
                                                     <div id="chatName">{userInfo?.nickname || '절대고집'}</div>
                                                     <div>검색</div>
                                                     <div>
-                                                        <a role="button" id="toggleSidebar" onClick={toggleSideBar}><img src={menu} alt={"menu"}/></a>
+                                                        <a role="button" id="toggleSidebar" onClick={toggleSideBar}><img
+                                                            src={menu} alt={"menu"}/></a>
                                                     </div>
                                                 </div>
                                                 <div className="chat-window">
                                                     <div id="chatMessages">
                                                         {messages.map((msg) => (
-                                                            <MessageItem key={msg.msgId} msg={msg} currentUserId={1} deleteMessage={deleteMessage} />
+                                                            <MessageItem key={msg.msgId} msg={msg} currentUserId={1}
+                                                                         deleteMessage={deleteMessage}/>
                                                         ))}
                                                     </div>
                                                     <div className="input">
                                                         <div>
                                                             <form method="post">
-                                                                <textarea name="chat" id="chatInput" rows={1} value={message} onChange={(e) => setMessage(e.target.value)}
+                                                                <textarea name="chat" id="chatInput" rows={1}
+                                                                          value={message}
+                                                                          onChange={(e) => setMessage(e.target.value)}
                                                                           placeholder="메시지 입력..."></textarea>
                                                             </form>
                                                             <div><img className="icon" src={messageImg} alt="보내기 아이콘"
@@ -262,8 +271,8 @@ const Chat = () => {
                                                     <div className="side-bar-img-wrap">
                                                         <div className="profile-image">
                                                             <a role="button" className="send-message"
-                                                               data-bs-toggle="modal"
-                                                               data-bs-target="#invite-modal">
+                                                               data-modal-toggle="invite-modal"
+                                                               data-modal-target="invite-modal">
                                                                 <div><img src={question}/></div>
                                                                 <span>새로운 사용자 초대</span>
                                                             </a>
@@ -294,18 +303,21 @@ const Chat = () => {
                                     </div>
                                 </div>
 
-                                <div id="default-modal" tabIndex={-1} aria-hidden="true"
+                                <CreateChatRoomModal/>
+
+
+                                <div id="invite-modal" tabIndex={-1} aria-hidden="true"
                                      className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
                                     <div className="relative p-4 w-full max-w-2xl max-h-full">
                                         <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
                                             <div
                                                 className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
                                                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                                                    새로운 채팅방
+                                                    사용자 초대
                                                 </h3>
                                                 <button type="button"
                                                         className="gtext-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
-                                                        data-modal-hide="default-modal">
+                                                        data-modal-hide="invite-modal">
                                                     <svg className="w-3 h-3" aria-hidden="true"
                                                          xmlns="http://www.w3.org/2000/svg" fill="none"
                                                          viewBox="0 0 14 14">
@@ -317,20 +329,17 @@ const Chat = () => {
                                                 </button>
                                             </div>
                                             <div className="p-4 md:p-5 space-y-4">
-                                                <form id="createChatRoomForm">
+                                                <form id="invite-form">
                                                     <div className="mb-3">
-                                                        <label className="form-label">채팅방 제목</label>
-                                                        <input type="text" className="form-control" id="chatRoomTitle" required />
+                                                        <label className="form-label">받는 사람</label>
+                                                        <input type="text" className="form-control" id="recipient"
+                                                               placeholder="사용자 이름 또는 ID 검색"/>
+                                                        <div id="selectedUserLists"
+                                                             className="selected-user-list"></div>
                                                     </div>
-                                                    <div className="mb-3">
-                                                        <label className="form-label">초대할 사용자</label>
-                                                        <input type="text" className="form-control" id="create-inviteUser" placeholder="사용자 이름 또는 ID 검색" />
-                                                        <div id="selectedUserList" className="selected-user-list"></div>
+                                                    <div className="search-results">
                                                     </div>
-                                                    <div id="userList" className="mb-3"></div>
-                                                    <div className="btn-chat-create">
-                                                        <button type="submit" className="btn btn-primary">생성</button>
-                                                    </div>
+                                                    <button type="submit">초대</button>
                                                 </form>
                                             </div>
                                         </div>
@@ -347,16 +356,7 @@ const Chat = () => {
                                 {/*                        aria-label="Close">X</button>*/}
                                 {/*            </div>*/}
                                 {/*            <div className="modal-body">*/}
-                                {/*                <form id="invite-form">*/}
-                                {/*                    <div className="mb-3">*/}
-                                {/*                        <label className="form-label">받는 사람</label>*/}
-                                {/*                        <input type="text" className="form-control" id="recipient" placeholder="사용자 이름 또는 ID 검색" />*/}
-                                {/*                            <div id="selectedUserLists" className="selected-user-list"></div>*/}
-                                {/*                    </div>*/}
-                                {/*                    <div className="search-results">*/}
-                                {/*                    </div>*/}
-                                {/*                    <button type="submit">초대</button>*/}
-                                {/*                </form>*/}
+
                                 {/*            </div>*/}
                                 {/*        </div>*/}
                                 {/*    </div>*/}
