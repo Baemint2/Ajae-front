@@ -5,7 +5,6 @@ interface IUser {
     username: string;
     profile?: string;
     nickname: string;
-    password: string;
 }
 
 interface CreateChatRoomModalProps {
@@ -29,10 +28,30 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
         }
     }, [inviteUserInput]);
 
+    const testUserList = () => {
+        return [
+        {
+            username: 'testUser1',
+            nickname: "테스트유저1",
+        },
+        {
+            username: 'testUser2',
+            nickname: "테스트유저2",
+        },
+        {
+            username: 'testUser3',
+            nickname: "테스트유저3",
+        },
+        {
+            username: 'testUser4',
+            nickname: "테스트유저4",
+        },
+    ]}
 
     useEffect(() => {
         if (isOpen) {
-            getUsers();
+            //getUsers();
+            setUsers(testUserList());
             console.log("유저나오나욘")
         }
 
@@ -83,6 +102,13 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
             });
     };
 
+    const handleInvite = (user: string) => {
+        setInviteUsers(prevSet  => {
+            const newSet = new Set(prevSet);
+            newSet.delete(user);
+            return newSet;
+        })
+    }
 
 
     // @ts-ignore
@@ -111,9 +137,13 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
                         </button>
                     </div>
                     <div className="p-4 md:p-5 space-y-4">
-                        <div id="selectedUserList" className="mt-5 border p-3">
+                        <div id="selectedUserList"
+                             className="mt-5 p-3 flex flex-wrap gap-2">
                             {[...inviteUsers].map((user) => (
-                                <div>{user}</div>
+                                <div className="border p-3 flex flex-row justify-between items-center w-44">
+                                    <span className="text-xl">{user}</span>
+                                    <button className="mr-5 end" onClick={() => handleInvite(user)}>x</button>
+                                </div>
                             ))}
                         </div>
                         <form id="createChatRoomForm">
@@ -136,6 +166,8 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
                                                     onClick={() => setInviteUsers((prev) => new Set(prev).add(user.nickname))}
                                                 >
                                                     초대
+
+                                                    {/*Todo 초대 버튼 체크 박스로 변경하고 눌러져있는 상태에서 다시 누르면 set에서 delete 되게 추가하기.*/}
                                                 </button>
                                         </div>
                                     ))}
