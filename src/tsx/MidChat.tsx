@@ -115,7 +115,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
                     <div className="profile-image">
                         <div><img src={anonymous}/></div>
                     </div>
-                    <div id="chatName">{chatRoomInfo?.chatRoomTitle ? chatRoomInfo.chatRoomTitle : join() }</div>
+                    <div id="chatName" className="w-56">{chatRoomInfo?.chatRoomTitle ? chatRoomInfo.chatRoomTitle : join() }</div>
                     <div>검색</div>
                     <div>
                         <a role="button" id="toggleSidebar" onClick={toggleSideBar}><img
@@ -160,7 +160,11 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
                             </button>
                         </div>
                     </div>
-                    <InviteModal isOpen={isInviteModalOpen} isClose={closeInviteModal}/>
+                    <InviteModal isOpen={isInviteModalOpen}
+                                 isClose={closeInviteModal}
+                                 modalTitle="사용자 초대"
+                                 chatRoomInfo={chatRoomInfo}
+                    />
                     <hr/>
                     <div className="w-full flex flex-col pl-5">
                         {(

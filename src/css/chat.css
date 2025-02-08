@@ -348,7 +348,7 @@ main {
 
 .message #chatName {
     display: flex;
-    width: 200px;
+    width: 400px;
 }
 
 .message #chatName>div {

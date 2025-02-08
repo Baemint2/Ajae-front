@@ -35,7 +35,7 @@ interface IChatRoomInfo {
 }
 
 const Chat = () => {
-    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [userInfo, setUserInfo] = useState<UserInfo>();
     const [chatRooms, setChatRooms] = useState<IChatRoomInfo[]>([]);
     const [chatRoomInfo, setChatRoomInfo] = useState<IChatRoomInfo>();
     const {setUser} = useUser();
@@ -183,7 +183,7 @@ const Chat = () => {
                                                 </div>
                                             </div>
 
-                                            <CreateChatRoomModal isOpen={isCreateModalOpen} isClose={closeCreateModal}/>
+                                            <CreateChatRoomModal isOpen={isCreateModalOpen} isClose={closeCreateModal} modalTitle="채팅방 생성" userInfo={userInfo}/>
 
 
                                             <MidChat currentChatRoomId={currentChatRoomId}
