@@ -1,17 +1,23 @@
 import naverLogin from "../img/btnG_official.png";
 import kakaoLogin from "../img/kakao_login_medium_narrow.png";
 import googleLogin from "../img/web_light_sq_SI@2x.png";
+import {useState} from "react";
 
 const Login = () => {
+
+    const [username, setUsername] = useState<string>("")
+    const [password, setPassword] = useState<string>("")
+
     const handleLogin = (provider: string) => {
         window.location.href = `http://localhost:8080/oauth2/authorization/${provider}`;
     }
 
     const handleLogin2 = async () => {
         const data = new URLSearchParams({
-            username: "moz1mozi",
-            password: "1234",
+            username: username,
+            password: password,
         });
+
         const response = await fetch("http://localhost:8090/login", {
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -39,9 +45,18 @@ const Login = () => {
             <img id="google-login" src={googleLogin} alt="구글 로그인" onClick={() => handleLogin("google")}></img>
             <form onSubmit={(e) => e.preventDefault()}>
                 <label>아이디</label>
-                <input name={"username"}/>
+                <input
+                    name="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)} // ✅ 입력값 변경 시 상태 업데이트
+                />
                 <label>비밀번호</label>
-                <input name={"password"}/>
+                <input
+                    name="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)} // ✅ 입력값 변경 시 상태 업데이트
+                />
                 <button onClick={handleLogin2}>로그인</button>
             </form>
         </div>
