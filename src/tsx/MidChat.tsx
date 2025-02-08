@@ -5,19 +5,9 @@ import messageImg from "../img/message.png";
 import React, {useEffect, useRef, useState} from "react";
 import question from "../img/question.png";
 import { UserInfo } from "./interface/userTypes";
+import { Message } from "./interface/msgTypes";
 import InviteModal from "./InviteModal";
-
-
-interface Message {
-    msgId: number;
-    userId: number;
-    nickname: string;
-    empProfile?: string;
-    msgContent: string;
-    msgDt: string;
-    msgStat: number | "DELETED";
-    chatRoomNo: number;
-}
+import {useStomp} from "./StompContext";
 
 interface IChatRoomInfo {
     chatRoomId: number;
@@ -29,21 +19,23 @@ interface IChatRoomInfo {
 }
 
 interface MidChatProps {
-
     currentChatRoomId: number | null
     chatRoomInfo?: IChatRoomInfo
+    userInfo: UserInfo
 }
 
-const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
+const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userInfo}) => {
+    const { stompClient, isConnected } = useStomp(); // ✅ STOMP 상태 가져오기
     const rightSidebarRef = useRef<HTMLDivElement>(null);
     const midChatRef = useRef<HTMLDivElement>(null);
+
 
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
 
-
     useEffect(() => {
+        console.log(chatRoomInfo)
     }, [chatRoomInfo]);
 
     const deleteMessage = () => {
@@ -51,11 +43,13 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
     }
 
     useEffect(() => {
-        if(currentChatRoomId === null) {
-            toggleSideBar()
+        if (currentChatRoomId === null) {
+            toggleSideBar();
+        } else {
+            getChatMessages(currentChatRoomId);
         }
+    }, [currentChatRoomId]); // ✅ currentChatRoomId가 변경될 때 실행
 
-    }, [currentChatRoomId]);
 
     const toggleSideBar = () => {
 
@@ -77,22 +71,37 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
 
     const sendMessage = () => {
         console.log("메시지 전송");
-        // if (stompClient.connected) {
-        //     const newMsg = {
-        //         msgId: Date.now(),
-        //         userId: 1,
-        //         nickname: "나",
-        //         msgContent: message,
-        //         msgDt: new Date().toISOString(),
-        //         msgStat: 0,
-        //         chatRoomNo: 123,
-        //     };
-        //     setMessages((prevMessages) => [...prevMessages, newMsg]);
-        // stompClient.publish({
-        //     destination: "/pub/chat/message", // Spring Boot에서 메시지 처리
-        //     body: JSON.stringify(newMsg),
-        // });
-        setMessage("");
+        if (stompClient?.connected) {
+            const newMsg = {
+                msgId: Date.now(),
+                userId: userInfo.id,
+                creator: userInfo.username || "Unknown",
+                msgContent: message,
+                msgDt: new Date().toISOString(),
+                msgStat: 0,
+                chatRoomNo: currentChatRoomId!,
+            };
+            setMessages((prevMessages) => [...prevMessages, newMsg]);
+            stompClient.publish({
+                destination: "/pub/chat/message", // Spring Boot에서 메시지 처리
+                body: JSON.stringify(newMsg),
+            });
+            setMessage("");
+        }
+    }
+
+    const getChatMessages = async (chatRoomNo: number | undefined) => {
+        const response = await fetch("http://localhost:8090/message/get", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/JSON'
+            },
+            body: JSON.stringify(chatRoomNo)
+        });
+
+        const data = await response.json();
+        console.log(data.message);
+        setMessages(data.message);
     }
 
     const join = () => {
@@ -106,8 +115,8 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
     const closeInviteModal = () => {
         setIsInviteModalOpen(false);
     }
-    
-    return (
+
+        return (
         <>
             <div className="mid-chat" ref={midChatRef}
                  style={{display: currentChatRoomId ? "flex" : "none"}}>
@@ -125,7 +134,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo}) => {
                 <div className="chat-window">
                     <div id="chatMessages">
                         {messages.map((msg) => (
-                            <MessageItem key={msg.msgId} msg={msg} currentUserId={1}
+                            <MessageItem key={msg.msgId} msg={msg} currentUserId={userInfo?.id}
                                          deleteMessage={deleteMessage}/>
                         ))}
                     </div>

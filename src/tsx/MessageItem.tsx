@@ -1,19 +1,9 @@
 import React, { useState } from "react";
-
-interface Message {
-    msgId: number;
-    userId: number;
-    nickname: string;
-    empProfile?: string;
-    msgContent: string;
-    msgDt: string;
-    msgStat: number | "DELETED";
-    chatRoomNo: number;
-}
+import {Message} from "./interface/msgTypes";
 
 interface MessageItemProps {
     msg: Message;
-    currentUserId: number;
+    currentUserId?: number;
     deleteMessage: (msgId: number, chatRoomNo: number) => void;
 }
 
@@ -34,8 +24,8 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, currentUserId, deleteMes
             )}
 
             {/* 메시지 내용 */}
-            <div className={msg.msgStat === 1 || msg.msgStat === "DELETED" ? "deleted-chat" : "chat"}>
-                {msg.msgStat === 1 || msg.msgStat === "DELETED" ? (
+            <div className={msg.msgStat === 1 ? "deleted-chat" : "chat"}>
+                {msg.msgStat === 1 ? (
                     "삭제된 메시지입니다"
                 ) : (
                     <pre>{msg.msgContent}</pre> // ✅ `<pre>` 태그로 줄바꿈 유지
