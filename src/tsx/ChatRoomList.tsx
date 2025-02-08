@@ -1,10 +1,12 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import ChatRoomItem from "./ChatRoomItem";
+import { UserInfo } from "./interface/userTypes";
 
 interface ChatRoom {
     chatRoomId: number;
     chatRoomTitle?: string;
     msgContent?: string;
+    participantUsers: UserInfo[];
 }
 
 interface ChatRoomListProps {
@@ -26,6 +28,8 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                                                    }) => {
 
 
+    useEffect(() => {
+    }, [chatRooms]);
 
     return (
         <div>

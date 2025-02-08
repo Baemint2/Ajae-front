@@ -1,10 +1,13 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+import {UserInfo} from "./interface/userTypes";
+import Anonymous from "../img/anonymous.png"
 
 interface ChatRoomProps {
     chatRoom: {
         chatRoomId: number;
         chatRoomTitle?: string;
         msgContent?: string;
+        participantUsers: UserInfo[];
     };
     currentChatRoomId: number | null;
     setCurrentChatRoomId: (chatRoomId: number | null) => void;
@@ -25,13 +28,16 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
         if (currentChatRoomId === chatRoom.chatRoomId) {
             setCurrentChatRoomId(null);
         } else {
-
             setCurrentChatRoomId(chatRoom.chatRoomId);
             loadMessages(chatRoom.chatRoomId);
             subscribeToParticipants(chatRoom.chatRoomId);
             updateUnreadMessageCounts();
         }
     };
+
+    const join = () => {
+        return chatRoom.participantUsers.map(user => user.nickname).join(", ");
+    }
 
     return (
         <div
@@ -42,13 +48,13 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
             {/* 프로필 이미지 */}
             <div className="profile-image">
                 <div>
-                    <img src="/img/anonymous.png" alt="Profile" />
+                    <img src={Anonymous} alt="Profile" />
                 </div>
             </div>
 
             {/* 채팅방 정보 */}
             <div className="side-chat-room">
-                <div>{chatRoom.chatRoomTitle}</div>
+                <div>{chatRoom.chatRoomTitle ? chatRoom.chatRoomTitle : join()}</div>
                 <div className="latest-message">
                     {chatRoom.msgContent ? chatRoom.msgContent.replace(/\n/g, "<br>") : "첫 메시지를 보내보세요!"}
                 </div>
