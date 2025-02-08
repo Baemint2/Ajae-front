@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import anonymous from "../img/anonymous.png"
+import anonymous from "../img/anonymous.png";
 
 interface IUser {
     username: string;
@@ -7,15 +7,15 @@ interface IUser {
     nickname: string;
 }
 
-interface CreateChatRoomModalProps {
+interface InviteModalProps {
     isOpen: boolean,
     isClose: () => void
 }
 
-const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
-                                                                     isOpen,
-                                                                     isClose
-                                                                 }) => {
+const InviteModal: React.FC<InviteModalProps> = ({
+                                                             isOpen,
+                                                             isClose
+                                                         }) => {
 
     const [users, setUsers] = useState<IUser[]>([]);   // 사용자 목록
     const [title, setTitle] = useState<string>("")
@@ -44,35 +44,6 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
         }
     }, [isOpen]);
 
-    const createChatRoom = async () => {
-        console.log(title);
-        const getCookie = (name: String) => {
-            const cookies = document.cookie.split("; ");
-            for (let cookie of cookies) {
-                const [key, value] = cookie.split("=");
-                if (key === name) return value;
-            }
-            return null;
-        };
-
-        const username = getCookie("username");
-        const body = {
-            title: title,
-            creator: username,
-            usernameList: [username, ...inviteUsers],
-        }
-
-        const response = await fetch(`http://localhost:8090/chatRoom`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)
-        });
-        const data = await response.json();
-        console.log(data);
-    }
-
     const searchUsers = async (nickname: string) => {
         const response = await fetch(`http://localhost:8090/users/${nickname}`, {
             method: "GET",
@@ -85,8 +56,6 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
         console.log(data);
         setUsers(data)
     }
-
-
 
     const getUsers = () => {
         fetch("http://localhost:8090/users", {
@@ -118,23 +87,23 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
         setInviteUserInput("");
     }
 
-
-    // @ts-ignore
     return (
-        <div id="default-modal" tabIndex={-1} aria-hidden="true"
+        <div id="invite-modal" tabIndex={-1} aria-hidden="true"
              className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full"
-             style={{display: isOpen ? "flex" : "none"}}>
+             style={{display: isOpen ? "flex" : "none"}}
+        >
             <div className="relative p-4 w-full max-w-2xl max-h-full">
                 <div className="relative bg-white rounded-lg shadow-sm dark:bg-white text-2xl">
                     <div
                         className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:bg-blue-400 border-gray-200">
                         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                            대화상대 선택
+                            사용자 초대
                         </h3>
                         <button type="button"
                                 onClick={isClose}
-                                className="gtext-gray-400 bg-transparent
-                                hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                                className="gtext-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900
+                                rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center
+                                dark:hover:bg-gray-600 dark:hover:text-white">
                             <svg className="w-3 h-3" aria-hidden="true"
                                  xmlns="http://www.w3.org/2000/svg" fill="none"
                                  viewBox="0 0 14 14">
@@ -154,7 +123,9 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
                                 </div>
                             ))}
                         </div>
-                        <form id="createChatRoomForm" onSubmit={(e) => e.preventDefault()}>
+                        <form id="invite-form"
+                              onSubmit={e => e.preventDefault()}
+                        >
                             <div className="mb-3 flex flex-col text-2xl mt-4">
                                 <input type="text"
                                        className="form-control mt-2 rounded-xl"
@@ -189,13 +160,7 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
                                     ))}
                                 </div>
                             </div>
-                            <div id="userList" className="mb-3"></div>
-                            <div className="btn-chat-create">
-                                <button
-                                    className="btn btn-primary"
-                                    onClick={createChatRoom}
-                                >생성</button>
-                            </div>
+                            <button type="submit">초대</button>
                         </form>
                     </div>
                 </div>
@@ -203,5 +168,4 @@ const CreateChatRoomModal: React.FC<CreateChatRoomModalProps> = ({
         </div>
     )
 }
-
-export default CreateChatRoomModal
+export default InviteModal;
