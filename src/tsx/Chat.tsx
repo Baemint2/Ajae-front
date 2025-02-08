@@ -1,29 +1,14 @@
 import "../css/chat.css"
 import write from "../img/write.png"
-import anonymous from "../img/anonymous.png"
-import menu from "../img/menu.png"
 import messageImg from "../img/message.png"
-import question from "../img/question.png"
-import React, {useEffect, useRef, useState} from "react";
-import sockJS from "sockjs-client"
-import { Client } from "@stomp/stompjs";
-import MessageItem from "./MessageItem";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import ChatRoomList from "./ChatRoomList";
 import {useUser} from "./UserContext";
 import { UserInfo } from "./interface/userTypes";
 import CreateChatRoomModal from "./CreateChatRoomModal";
 import MidChat from "./MidChat";
+import {StompProvider} from "./StompContext";
 
-interface Message {
-    msgId: number;
-    userId: number;
-    nickname: string;
-    empProfile?: string;
-    msgContent: string;
-    msgDt: string;
-    msgStat: number | "DELETED";
-    chatRoomNo: number;
-}
 
 interface IChatRoomInfo {
     chatRoomId: number;
@@ -41,20 +26,16 @@ const Chat = () => {
     const {setUser} = useUser();
     const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+    const [isLoading, setIsLoading] = useState<boolean>(true);
 
     useEffect(() => {
+        setIsLoading(true)
         getUserInfo();
     }, []);
 
     useEffect(() => {
-        if (userInfo?.username) {
-            getChatRoom();
-        }
-    }, [userInfo]);
-
-    useEffect(() => {
         if (currentChatRoomId) {
-            const selectedRoom = chatRooms.find((room) => room.chatRoomId === currentChatRoomId);
+            const selectedRoom = chatRooms?.find((room) => room.chatRoomId === currentChatRoomId);
             setChatRoomInfo(selectedRoom);
         }
     }, [currentChatRoomId, chatRooms]);
@@ -67,7 +48,6 @@ const Chat = () => {
     const closeCreateModal = () => {
         setIsCreateModalOpen(false);
     }
-
 
     const getUserInfo = async () => {
         const getCookie = (name: String) => {
@@ -90,31 +70,26 @@ const Chat = () => {
             const data = await response.json();
             setUser(data);
             setUserInfo(data.second); // 사용자 정보 설정
+            await getChatRoom(data.second.username);
         } catch (error) {
             console.error("사용자 정보 가져오기 오류:", error);
+        } finally {
+
+            setTimeout(() => {
+                setIsLoading(false)
+            }, 100)
+
         }
     };
 
-    const socket = new sockJS("http://localhost:8090/chat");
+    const getChatRoom = async (username: String) => {
 
-    const stompClient = new Client({
-        webSocketFactory: () => socket,
-        reconnectDelay: 5000,
-    });
+        if (chatRooms !== null && chatRooms.length > 0) {
+            console.log("🔹 변경 사항 없음 → API 호출 생략");
+            return;
+        }
 
-    stompClient.onConnect = () => {
-        console.log("STOMP Connected!");
-
-        // // 구독 설정 (서버에서 메시지를 받을 경로)
-        // stompClient.subscribe("/sub/chatroom", (message) => {
-        //     console.log("서버로부터 메시지 수신: ", JSON.parse(message.body));
-        // });
-    };
-
-    stompClient.activate();
-
-    const getChatRoom = async () => {
-        const response = await fetch(`http://localhost:8090/chatRoom/${userInfo?.username}`, {
+        const response = await fetch(`http://localhost:8090/chatRoom/${username}`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json'
@@ -135,6 +110,7 @@ const Chat = () => {
     };
 
     return (
+        <StompProvider>
         <div>
             <div className="crispy-container">
                 <div>
@@ -164,6 +140,7 @@ const Chat = () => {
                                                                 subscribeToParticipants={subscribeToParticipants}
                                                                 updateUnreadMessageCounts={updateUnreadMessageCounts}
                                                                 setCurrentChatRoomId={setCurrentChatRoomId}
+                                                                isLoading={isLoading}
                                                             />
                                                         </div>
                                                     </div>
@@ -188,6 +165,7 @@ const Chat = () => {
 
                                             <MidChat currentChatRoomId={currentChatRoomId}
                                                      chatRoomInfo={chatRoomInfo}
+                                                     userInfo={userInfo!}
                                             />
                                         </div>
                                     </div>
@@ -197,8 +175,8 @@ const Chat = () => {
                     </main>
                 </div>
             </div>
-
         </div>
+        </StompProvider>
     )
 }
 
