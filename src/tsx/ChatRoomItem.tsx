@@ -1,17 +1,13 @@
 import React, {useEffect, useState} from "react";
 import {UserInfo} from "./interface/userTypes";
+import {ChatRoom} from "./interface/chatRoomTypes";
 import Anonymous from "../img/anonymous.png"
+import {useStomp} from "./StompContext";
 
 interface ChatRoomProps {
-    chatRoom: {
-        chatRoomId: number;
-        chatRoomTitle?: string;
-        msgContent?: string;
-        participantUsers: UserInfo[];
-    };
+    chatRoom: ChatRoom;
     currentChatRoomId: number | null;
     setCurrentChatRoomId: (chatRoomId: number | null) => void;
-    loadMessages: (chatRoomId: number) => void;
     subscribeToParticipants: (chatRoomId: number) => void;
     updateUnreadMessageCounts: () => void;
 }
@@ -20,18 +16,27 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
                                                    chatRoom,
                                                    currentChatRoomId,
                                                    setCurrentChatRoomId,
-                                                   loadMessages,
                                                    subscribeToParticipants,
                                                    updateUnreadMessageCounts,
                                                }) => {
+
+    const { stompClient } = useStomp();
+
     const handleClick = () => {
         if (currentChatRoomId === chatRoom.chatRoomId) {
             setCurrentChatRoomId(null);
         } else {
             setCurrentChatRoomId(chatRoom.chatRoomId);
-            loadMessages(chatRoom.chatRoomId);
             subscribeToParticipants(chatRoom.chatRoomId);
             updateUnreadMessageCounts();
+
+            if (stompClient && stompClient.connected) {
+                console.log(stompClient)
+                stompClient.publish({
+                    destination: "/pub/chat/join",
+                    body: JSON.stringify({ userId: 17 }), // 🔹 현재 유저 ID 넣기
+                });
+            }
         }
     };
 
@@ -56,12 +61,14 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
             <div className="side-chat-room">
                 <div>{chatRoom.chatRoomTitle ? chatRoom.chatRoomTitle : join()}</div>
                 <div className="latest-message">
-                    {chatRoom.msgContent ? chatRoom.msgContent.replace(/\n/g, "<br>") : "첫 메시지를 보내보세요!"}
+                    {chatRoom.latelyMessage ? chatRoom.latelyMessage.replace(/\n/g, "<br>") : "첫 메시지를 보내보세요!"}
                 </div>
             </div>
 
             {/* 안 읽은 메시지 카운트 */}
-            <div className="unread-count-badge"></div>
+            <div className="unread-count-badge"
+                 style={{display: chatRoom.unreadCount === 0 ? "none" : "flex"}}
+            >{chatRoom.unreadCount}</div>
         </div>
     );
 };

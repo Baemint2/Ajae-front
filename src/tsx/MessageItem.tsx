@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {Message} from "./interface/msgTypes";
+import Anonymous from "../img/anonymous.png"
 
 interface MessageItemProps {
     msg: Message;
@@ -19,7 +20,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, currentUserId, deleteMes
             {/* 프로필 이미지 */}
             {msg.userId !== currentUserId && (
                 <div className="profile-image">
-                    <img src={msg.empProfile || "/img/anonymous.png"} alt="Profile" />
+                    <img src={msg.empProfile || Anonymous} alt="Profile" />
                 </div>
             )}
 
@@ -28,7 +29,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ msg, currentUserId, deleteMes
                 {msg.msgStat === 1 ? (
                     "삭제된 메시지입니다"
                 ) : (
-                    <pre>{msg.msgContent}</pre> // ✅ `<pre>` 태그로 줄바꿈 유지
+                    <pre>{msg.msgContent}</pre>
                 )}
 
                 {/* 삭제 버튼 (본인 메시지인 경우만 표시) */}
