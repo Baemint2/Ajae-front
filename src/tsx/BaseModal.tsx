@@ -143,7 +143,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
             body: JSON.stringify(body)
         });
         const data = await response.json();
-        console.log(data);
+        window.location.reload();
     }
 
     const handleInvite = (user: string) => {

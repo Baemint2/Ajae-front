@@ -2,7 +2,7 @@ import anonymous from "../img/anonymous.png";
 import menu from "../img/menu.png";
 import MessageItem from "./MessageItem";
 import messageImg from "../img/message.png";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import question from "../img/question.png";
 import { UserInfo } from "./interface/userTypes";
 import { Message } from "./interface/msgTypes";
@@ -22,21 +22,63 @@ interface MidChatProps {
     currentChatRoomId: number | null
     chatRoomInfo?: IChatRoomInfo
     userInfo: UserInfo
+    setChatRooms: React.Dispatch<React.SetStateAction<IChatRoomInfo[]>>
 }
 
-const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userInfo}) => {
-    const { stompClient, isConnected } = useStomp(); // ✅ STOMP 상태 가져오기
+const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userInfo, setChatRooms}) => {
+    const { stompClient, isConnected } = useStomp();
     const rightSidebarRef = useRef<HTMLDivElement>(null);
     const midChatRef = useRef<HTMLDivElement>(null);
-
+    const chatContainerRef = useRef<HTMLDivElement>(null);
 
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        console.log(chatRoomInfo)
-    }, [chatRoomInfo]);
+        if (stompClient && isConnected && currentChatRoomId) {
+            const subscription = stompClient.subscribe(
+                `/sub/chat/room/${currentChatRoomId}`,
+                (message) => {
+                    const receivedMessage = JSON.parse(message.body);
+                    const newVar = {...receivedMessage};
+                    newVar.msgDt = new Date().toISOString()
+                    console.log(newVar)
+                    setMessages((prevMessages) => [...prevMessages, newVar]);
+                }
+
+            );
+
+            return () => {
+                subscription.unsubscribe(); // 🔹 컴포넌트 언마운트 시 구독 해제
+            };
+        }
+
+    }, [stompClient, isConnected, currentChatRoomId]);
+
+
+    useEffect(() => {
+        if (stompClient && isConnected && userInfo.id) {
+            console.log(userInfo.id)
+            const subscription = stompClient.subscribe(
+                `/user/queue/unread-messages`,
+                (message) => {
+                    console.log("여기 동작하나요?")
+                    console.log(message)
+                    const updatedUnreadCounts = JSON.parse(message.body).unread;
+                    setChatRooms(prevChatRooms =>
+                        prevChatRooms.map(room =>
+                            updatedUnreadCounts.find((unread: { chatRoomId: number; }) => unread.chatRoomId === room.chatRoomId)
+                                ? { ...room, unreadCount: updatedUnreadCounts.find((unread: { chatRoomId: number; }) => unread.chatRoomId === room.chatRoomId).unreadCount }
+                                : room
+                        )
+                    );
+                }
+            );
+
+            return () => subscription.unsubscribe();
+        }
+    }, [stompClient, isConnected, userInfo, setChatRooms]);
 
     const deleteMessage = () => {
         console.log("메시지 삭제")
@@ -48,7 +90,15 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
         } else {
             getChatMessages(currentChatRoomId);
         }
-    }, [currentChatRoomId]); // ✅ currentChatRoomId가 변경될 때 실행
+    }, [currentChatRoomId]);
+
+    useLayoutEffect(() => {
+        if (chatContainerRef.current) {
+            requestAnimationFrame(() => {
+                chatContainerRef.current!.scrollTop = chatContainerRef.current!.scrollHeight;
+            });
+        }
+    }, [currentChatRoomId, messages]);
 
 
     const toggleSideBar = () => {
@@ -81,22 +131,41 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                 msgStat: 0,
                 chatRoomNo: currentChatRoomId!,
             };
-            setMessages((prevMessages) => [...prevMessages, newMsg]);
+            // setMessages((prevMessages) => [...prevMessages, newMsg]);
             stompClient.publish({
-                destination: "/pub/chat/message", // Spring Boot에서 메시지 처리
+                destination: "/pub/chat/message",
                 body: JSON.stringify(newMsg),
             });
             setMessage("");
         }
     }
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+        if (event.key === "Enter" && !event.shiftKey) {
+            if (event.nativeEvent.isComposing) {
+                return; // IME 입력 중이면 전송하지 않음
+            }
+
+            if (event.metaKey) {
+                return;
+            }
+
+            event.preventDefault();
+            sendMessage(); // 메시지 전송
+        }
+    }
+
     const getChatMessages = async (chatRoomNo: number | undefined) => {
+        const body = {
+            chatRoomNo: chatRoomNo,
+            userId: userInfo.id
+        }
         const response = await fetch("http://localhost:8090/message/get", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/JSON'
             },
-            body: JSON.stringify(chatRoomNo)
+            body: JSON.stringify(body)
         });
 
         const data = await response.json();
@@ -132,7 +201,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                     </div>
                 </div>
                 <div className="chat-window">
-                    <div id="chatMessages">
+                    <div id="chatMessages" ref={chatContainerRef}>
                         {messages.map((msg) => (
                             <MessageItem key={msg.msgId} msg={msg} currentUserId={userInfo?.id}
                                          deleteMessage={deleteMessage}/>
@@ -143,6 +212,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                             <form method="post">
                             <textarea name="chat" id="chatInput" rows={1}
                                       value={message}
+                                      onKeyDown={handleKeyDown}
                                       onChange={(e) => setMessage(e.target.value)}
                                       placeholder="메시지 입력..."
                             ></textarea>

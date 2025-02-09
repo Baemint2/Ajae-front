@@ -1,17 +1,11 @@
 import React, {useEffect, useMemo, useState} from "react";
 import ChatRoomItem from "./ChatRoomItem";
-import { UserInfo } from "./interface/userTypes";
-
-interface ChatRoom {
-    chatRoomId: number;
-    chatRoomTitle?: string;
-    msgContent?: string;
-    participantUsers: UserInfo[];
-}
+import { ChatRoom, IChatRoomInfo } from "./interface/chatRoomTypes";
+import {useStomp} from "./StompContext";
 
 interface ChatRoomListProps {
     chatRooms: ChatRoom[],
-    loadMessages: (chatRoomId: number) => void,
+    setChatRooms: React.Dispatch<React.SetStateAction<IChatRoomInfo[]>>
     subscribeToParticipants: (chatRoomId: number) => void,
     updateUnreadMessageCounts: () => void,
     currentChatRoomId: number | null;
@@ -21,7 +15,7 @@ interface ChatRoomListProps {
 
 const ChatRoomList: React.FC<ChatRoomListProps> = ({
                                                        chatRooms,
-                                                       loadMessages,
+                                                       setChatRooms,
                                                        subscribeToParticipants,
                                                        updateUnreadMessageCounts,
                                                        currentChatRoomId,
@@ -29,10 +23,24 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                                                        isLoading
                                                    }) => {
 
+    const { stompClient } = useStomp();
+
     useEffect(() => {
-        console.log(chatRooms)
-        console.log(isLoading)
-    }, [chatRooms]);
+        if (stompClient && stompClient.connected) {
+            // ✅ 최신 메시지 업데이트 구독
+            stompClient.subscribe("/sub/chat/update", (message) => {
+                const updatedRoom = JSON.parse(message.body);
+                setChatRooms((prevRooms) =>
+                    prevRooms.map((room) =>
+                        room.chatRoomId === updatedRoom.chatRoomNo
+                            ? { ...room, latelyMessage: updatedRoom.msgContent }
+                            : room
+                    )
+                );
+            });
+        }
+    }, [chatRooms, setChatRooms, stompClient]);
+
 
     const renderedChatRooms = useMemo(() => (
         chatRooms?.map((room) => (
@@ -41,7 +49,6 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 chatRoom={room}
                 currentChatRoomId={currentChatRoomId}
                 setCurrentChatRoomId={setCurrentChatRoomId}
-                loadMessages={loadMessages}
                 subscribeToParticipants={subscribeToParticipants}
                 updateUnreadMessageCounts={updateUnreadMessageCounts}
             />

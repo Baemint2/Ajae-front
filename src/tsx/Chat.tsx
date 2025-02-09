@@ -40,7 +40,6 @@ const Chat = () => {
         }
     }, [currentChatRoomId, chatRooms]);
 
-
     const openCreateModal = () => {
         setIsCreateModalOpen(true);
     }
@@ -71,6 +70,7 @@ const Chat = () => {
             setUser(data);
             setUserInfo(data.second); // 사용자 정보 설정
             await getChatRoom(data.second.username);
+            await getUnreadMessage(data.second.id);
         } catch (error) {
             console.error("사용자 정보 가져오기 오류:", error);
         } finally {
@@ -99,9 +99,20 @@ const Chat = () => {
         setChatRooms(data.chatRoom);
     }
 
-    const loadMessages = (chatRoomNo: number) => {
-        console.log("Loading messages for room:", chatRoomNo);
-    };
+    const getUnreadMessage = async (userId: number) => {
+        const response = await fetch(`http://localhost:8090/message/unread?userId=${userId}`);
+        const data = await response.json();
+        setChatRooms((prevChatRooms) =>
+            prevChatRooms.map((room) => {
+                const unread = data.unread.find((item: any) => item.chatRoomId === room.chatRoomId);
+                return {
+                    ...room,
+                    unreadCount: unread ? unread.unreadCount : 0, // 해당 채팅방의 읽지 않은 메시지 개수 추가
+                };
+            })
+        );
+    }
+
     const subscribeToParticipants = (chatRoomNo: number) => {
         console.log("Subscribing to room:", chatRoomNo);
     };
@@ -135,7 +146,7 @@ const Chat = () => {
                                                         <div className="msg-room-list" id="chatRoomList">
                                                             <ChatRoomList
                                                                 chatRooms={chatRooms}
-                                                                loadMessages={loadMessages}
+                                                                setChatRooms={setChatRooms}
                                                                 currentChatRoomId={currentChatRoomId}
                                                                 subscribeToParticipants={subscribeToParticipants}
                                                                 updateUnreadMessageCounts={updateUnreadMessageCounts}
@@ -160,10 +171,14 @@ const Chat = () => {
                                                 </div>
                                             </div>
 
-                                            <CreateChatRoomModal isOpen={isCreateModalOpen} isClose={closeCreateModal} modalTitle="채팅방 생성" userInfo={userInfo}/>
+                                            <CreateChatRoomModal isOpen={isCreateModalOpen}
+                                                                 isClose={closeCreateModal}
+                                                                 modalTitle="채팅방 생성"
+                                                                 userInfo={userInfo}/>
 
 
                                             <MidChat currentChatRoomId={currentChatRoomId}
+                                                     setChatRooms={setChatRooms}
                                                      chatRoomInfo={chatRoomInfo}
                                                      userInfo={userInfo!}
                                             />
