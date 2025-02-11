@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {UserInfo} from "./interface/userTypes";
 import {ChatRoom} from "./interface/chatRoomTypes";
 import Anonymous from "../img/anonymous.png"
+import {UserInfo} from "./interface/userTypes";
 import {useStomp} from "./StompContext";
 
 interface ChatRoomProps {
@@ -10,6 +10,7 @@ interface ChatRoomProps {
     setCurrentChatRoomId: (chatRoomId: number | null) => void;
     subscribeToParticipants: (chatRoomId: number) => void;
     updateUnreadMessageCounts: () => void;
+    userInfo?: UserInfo;
 }
 
 const ChatRoomItem: React.FC<ChatRoomProps> = ({
@@ -18,9 +19,8 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
                                                    setCurrentChatRoomId,
                                                    subscribeToParticipants,
                                                    updateUnreadMessageCounts,
+                                                   userInfo
                                                }) => {
-
-    const { stompClient } = useStomp();
 
     const handleClick = () => {
         if (currentChatRoomId === chatRoom.chatRoomId) {
@@ -29,14 +29,7 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
             setCurrentChatRoomId(chatRoom.chatRoomId);
             subscribeToParticipants(chatRoom.chatRoomId);
             updateUnreadMessageCounts();
-
-            if (stompClient && stompClient.connected) {
-                console.log(stompClient)
-                stompClient.publish({
-                    destination: "/pub/chat/join",
-                    body: JSON.stringify({ userId: 17 }), // 🔹 현재 유저 ID 넣기
-                });
-            }
+            chatRoom.unreadCount = 0;
         }
     };
 

@@ -2,6 +2,7 @@ import React, {useEffect, useMemo, useState} from "react";
 import ChatRoomItem from "./ChatRoomItem";
 import { ChatRoom, IChatRoomInfo } from "./interface/chatRoomTypes";
 import {useStomp} from "./StompContext";
+import {UserInfo} from "./interface/userTypes";
 
 interface ChatRoomListProps {
     chatRooms: ChatRoom[],
@@ -11,6 +12,7 @@ interface ChatRoomListProps {
     currentChatRoomId: number | null;
     setCurrentChatRoomId: (chatRoomId: number | null) => void,
     isLoading: boolean
+    userInfo?: UserInfo;
 }
 
 const ChatRoomList: React.FC<ChatRoomListProps> = ({
@@ -20,26 +22,40 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                                                        updateUnreadMessageCounts,
                                                        currentChatRoomId,
                                                        setCurrentChatRoomId,
-                                                       isLoading
+                                                       isLoading,
+                                                       userInfo
                                                    }) => {
 
     const { stompClient } = useStomp();
 
     useEffect(() => {
-        if (stompClient && stompClient.connected) {
-            // ✅ 최신 메시지 업데이트 구독
-            stompClient.subscribe("/sub/chat/update", (message) => {
-                const updatedRoom = JSON.parse(message.body);
-                setChatRooms((prevRooms) =>
-                    prevRooms.map((room) =>
-                        room.chatRoomId === updatedRoom.chatRoomNo
-                            ? { ...room, latelyMessage: updatedRoom.msgContent }
-                            : room
-                    )
-                );
-            });
-        }
-    }, [chatRooms, setChatRooms, stompClient]);
+        if (!stompClient || !stompClient.connected) return;
+
+
+        let subscription = stompClient.subscribe("/sub/chat/update", (message) => {
+            console.log(message);
+            const updatedRoom = JSON.parse(message.body);
+            setChatRooms((prevRooms) =>
+                prevRooms.map((room) =>
+                    room.chatRoomId === updatedRoom.chatRoomNo
+                        ? { ...room, latelyMessage: updatedRoom.msgContent }
+                        : room
+                )
+            );
+
+            if (currentChatRoomId !== updatedRoom.chatRoomNo) {
+                stompClient.publish({
+                    destination: "/pub/unread",
+                    body: JSON.stringify({ userId: userInfo?.id }),
+                });
+            }
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [stompClient, stompClient?.connected]);
+
 
 
     const renderedChatRooms = useMemo(() => (
@@ -51,9 +67,10 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 setCurrentChatRoomId={setCurrentChatRoomId}
                 subscribeToParticipants={subscribeToParticipants}
                 updateUnreadMessageCounts={updateUnreadMessageCounts}
+                userInfo={userInfo}
             />
         ))
-    ), [chatRooms, currentChatRoomId]); // ✅ chatRooms나 currentChatRoomId가 변경될 때만 재렌더링
+    ), [chatRooms, currentChatRoomId]);
 
     return (
         <div>

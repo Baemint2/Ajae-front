@@ -36,49 +36,36 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
     const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        if (stompClient && isConnected && currentChatRoomId) {
-            const subscription = stompClient.subscribe(
-                `/sub/chat/room/${currentChatRoomId}`,
-                (message) => {
-                    const receivedMessage = JSON.parse(message.body);
-                    const newVar = {...receivedMessage};
-                    newVar.msgDt = new Date().toISOString()
-                    console.log(newVar)
-                    setMessages((prevMessages) => [...prevMessages, newVar]);
-                }
+        if (!stompClient || !isConnected || !currentChatRoomId) return;
 
-            );
+        let subscription = stompClient.subscribe(
+            `/sub/chat/room/${currentChatRoomId}`,
+            (message) => {
+                const receivedMessage = JSON.parse(message.body);
+                const newMessage = { ...receivedMessage, msgDt: new Date().toISOString() };
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
+            }
+        );
 
-            return () => {
-                subscription.unsubscribe(); // 🔹 컴포넌트 언마운트 시 구독 해제
-            };
-        }
-
+        return () => {
+            subscription.unsubscribe();
+        };
     }, [stompClient, isConnected, currentChatRoomId]);
 
 
-    useEffect(() => {
-        if (stompClient && isConnected && userInfo.id) {
-            console.log(userInfo.id)
-            const subscription = stompClient.subscribe(
-                `/user/queue/unread-messages`,
-                (message) => {
-                    console.log("여기 동작하나요?")
-                    console.log(message)
-                    const updatedUnreadCounts = JSON.parse(message.body).unread;
-                    setChatRooms(prevChatRooms =>
-                        prevChatRooms.map(room =>
-                            updatedUnreadCounts.find((unread: { chatRoomId: number; }) => unread.chatRoomId === room.chatRoomId)
-                                ? { ...room, unreadCount: updatedUnreadCounts.find((unread: { chatRoomId: number; }) => unread.chatRoomId === room.chatRoomId).unreadCount }
-                                : room
-                        )
-                    );
-                }
-            );
 
-            return () => subscription.unsubscribe();
-        }
-    }, [stompClient, isConnected, userInfo, setChatRooms]);
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (stompClient && stompClient.connected && currentChatRoomId) {
+                console.log("30초마다 동작합니다.")
+                stompClient.publish({
+                    destination: "/pub/chat/access-update",
+                    body: JSON.stringify({ userId: userInfo.id, chatRoomId: currentChatRoomId })
+                });
+            }
+        }, 30000); // 30초마다 업데이트
+        return () => clearInterval(interval);
+    }, [stompClient, currentChatRoomId, userInfo]);
 
     const deleteMessage = () => {
         console.log("메시지 삭제")
@@ -87,6 +74,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
     useEffect(() => {
         if (currentChatRoomId === null) {
             toggleSideBar();
+
         } else {
             getChatMessages(currentChatRoomId);
         }
@@ -136,7 +124,9 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                 destination: "/pub/chat/message",
                 body: JSON.stringify(newMsg),
             });
+
             setMessage("");
+
         }
     }
 

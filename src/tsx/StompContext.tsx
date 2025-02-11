@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {createContext, useContext, useEffect, useRef, useState} from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 
@@ -9,18 +9,38 @@ interface StompContextProps {
 
 const StompContext = createContext<StompContextProps | undefined>(undefined);
 
+const getCookie = (name: String) => {
+    const cookies = document.cookie.split("; ");
+    for (let cookie of cookies) {
+        const [key, value] = cookie.split("=");
+        if (key === name) return value;
+    }
+    return null;
+};
+
 // ✅ STOMP Provider
 export const StompProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [stompClient, setStompClient] = useState<Client | null>(null);
+    const stompClientRef = useRef<Client | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
+        if (stompClientRef.current) return;
+
+        const username = getCookie("username");
+        if (!username) {
+            console.error("🚨 No username found in cookies!");
+            return;
+        }
+
         const socket = new SockJS("http://localhost:8090/chat");
         const client = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
+            connectHeaders: {
+                username: username,
+            },
             onConnect: () => {
-                console.log("✅ STOMP Connected!");
+                console.log(`✅ STOMP Connected as ${username}`);
                 setIsConnected(true);
             },
             onDisconnect: () => {
@@ -30,7 +50,7 @@ export const StompProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
 
         client.activate();
-        setStompClient(client);
+        stompClientRef.current = client;
 
         return () => {
             client.deactivate();
@@ -38,11 +58,12 @@ export const StompProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }, []);
 
     return (
-        <StompContext.Provider value={{ stompClient, isConnected }}>
+        <StompContext.Provider value={{ stompClient: stompClientRef.current, isConnected }}>
             {children}
         </StompContext.Provider>
     );
 };
+
 
 export const useStomp = () => {
     const context = useContext(StompContext);
