@@ -21,6 +21,7 @@ import UserJoke from './tsx/UserJoke';
 import UserJokeDetail from "./tsx/UserJokeDetail";
 import MyPage from './tsx/MyPage';
 import Chat from "./tsx/Chat";
+import {StompProvider} from "./tsx/StompContext";
 
 const router = createBrowserRouter([
   {
@@ -72,7 +73,9 @@ if (!rootElement) throw new Error('Failed to find the root element');
 const root = ReactDOM.createRoot(rootElement);
 root.render(
     <UserProvider>
-      <RouterProvider router={router} />
+      <StompProvider>
+        <RouterProvider router={router} />
+      </StompProvider>
     </UserProvider>
 );
 

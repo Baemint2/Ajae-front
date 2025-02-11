@@ -7,7 +7,7 @@ import {useUser} from "./UserContext";
 import { UserInfo } from "./interface/userTypes";
 import CreateChatRoomModal from "./CreateChatRoomModal";
 import MidChat from "./MidChat";
-import {StompProvider} from "./StompContext";
+import {useStomp} from "./StompContext";
 
 
 interface IChatRoomInfo {
@@ -17,6 +17,7 @@ interface IChatRoomInfo {
     creator: string;
     participantUsers: UserInfo[]
     updatedAt?: string
+    unreadCount?: number
 }
 
 const Chat = () => {
@@ -27,6 +28,7 @@ const Chat = () => {
     const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const { stompClient, isConnected } = useStomp();
 
     useEffect(() => {
         setIsLoading(true)
@@ -34,11 +36,37 @@ const Chat = () => {
     }, []);
 
     useEffect(() => {
+        if (!stompClient || !isConnected) return;
+
+        getUnreadMessage();
+        let subscription = stompClient.subscribe("/user/queue/unreadCount", (message) => {
+            const updatedRoom = JSON.parse(message.body);
+            console.log(updatedRoom)
+            console.log(chatRooms)
+            setChatRooms((prevRooms) =>
+                prevRooms.map((room) =>
+                    room.chatRoomId === updatedRoom.chatRoomNo
+                        ? { ...room, unreadCount: updatedRoom.unreadCount }
+                        : room
+                )
+            )
+        });
+
+        return () => {
+            subscription.unsubscribe();
+        };
+    }, [stompClient, userInfo, setChatRooms]);
+
+    useEffect(() => {
         if (currentChatRoomId) {
             const selectedRoom = chatRooms?.find((room) => room.chatRoomId === currentChatRoomId);
             setChatRoomInfo(selectedRoom);
         }
     }, [currentChatRoomId, chatRooms]);
+
+    useEffect(() => {
+
+    }, [stompClient, isConnected]);
 
     const openCreateModal = () => {
         setIsCreateModalOpen(true);
@@ -48,7 +76,7 @@ const Chat = () => {
         setIsCreateModalOpen(false);
     }
 
-    const getUserInfo = async () => {
+    const getUserInfo = () => {
         const getCookie = (name: String) => {
             const cookies = document.cookie.split("; ");
             for (let cookie of cookies) {
@@ -58,19 +86,19 @@ const Chat = () => {
             return null;
         };
         try {
-            const response = await fetch(`http://localhost:8090/userInfo/${getCookie("username")}`, {
+            fetch(`http://localhost:8090/userInfo/${getCookie("username")}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
                 },
-            });
-
-            if (!response.ok) throw new Error("사용자 정보를 가져오지 못했습니다.");
-            const data = await response.json();
-            setUser(data);
-            setUserInfo(data.second); // 사용자 정보 설정
-            await getChatRoom(data.second.username);
-            await getUnreadMessage(data.second.id);
+            }).then((response) => {
+               return response.json();
+            }).then((data: any) => {
+                setUser(data);
+                console.log(data);
+                setUserInfo(data.second); // 사용자 정보 설정
+                return getChatRoom(data.second.username);
+            })
         } catch (error) {
             console.error("사용자 정보 가져오기 오류:", error);
         } finally {
@@ -83,35 +111,27 @@ const Chat = () => {
     };
 
     const getChatRoom = async (username: String) => {
-
-        if (chatRooms !== null && chatRooms.length > 0) {
-            console.log("🔹 변경 사항 없음 → API 호출 생략");
-            return;
-        }
-
         const response = await fetch(`http://localhost:8090/chatRoom/${username}`, {
             method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
+            headers: { 'Content-Type': 'application/json' }
         });
         const data = await response.json();
         setChatRooms(data.chatRoom);
-    }
+    };
 
-    const getUnreadMessage = async (userId: number) => {
-        const response = await fetch(`http://localhost:8090/message/unread?userId=${userId}`);
-        const data = await response.json();
-        setChatRooms((prevChatRooms) =>
-            prevChatRooms.map((room) => {
-                const unread = data.unread.find((item: any) => item.chatRoomId === room.chatRoomId);
-                return {
-                    ...room,
-                    unreadCount: unread ? unread.unreadCount : 0, // 해당 채팅방의 읽지 않은 메시지 개수 추가
-                };
-            })
-        );
-    }
+
+    const getUnreadMessage = () => {
+        if (stompClient?.connected) {
+
+            stompClient.publish({
+                destination: "/pub/unread",
+                body: JSON.stringify({ userId: userInfo?.id }),
+            });
+        } else {
+            console.error("연결 안됨");
+        }
+    };
+
 
     const subscribeToParticipants = (chatRoomNo: number) => {
         console.log("Subscribing to room:", chatRoomNo);
@@ -121,7 +141,6 @@ const Chat = () => {
     };
 
     return (
-        <StompProvider>
         <div>
             <div className="crispy-container">
                 <div>
@@ -152,6 +171,7 @@ const Chat = () => {
                                                                 updateUnreadMessageCounts={updateUnreadMessageCounts}
                                                                 setCurrentChatRoomId={setCurrentChatRoomId}
                                                                 isLoading={isLoading}
+                                                                userInfo={userInfo}
                                                             />
                                                         </div>
                                                     </div>
@@ -174,7 +194,7 @@ const Chat = () => {
                                             <CreateChatRoomModal isOpen={isCreateModalOpen}
                                                                  isClose={closeCreateModal}
                                                                  modalTitle="채팅방 생성"
-                                                                 userInfo={userInfo}/>
+                                                                 userInfo={userInfo!}/>
 
 
                                             <MidChat currentChatRoomId={currentChatRoomId}
@@ -191,7 +211,6 @@ const Chat = () => {
                 </div>
             </div>
         </div>
-        </StompProvider>
     )
 }
 
