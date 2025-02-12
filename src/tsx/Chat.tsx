@@ -17,7 +17,8 @@ interface IChatRoomInfo {
     creator: string;
     participantUsers: UserInfo[]
     updatedAt?: string
-    unreadCount?: number
+    unreadCount?: number | 0
+    latelyMessage?: string
 }
 
 const Chat = () => {
@@ -36,26 +37,9 @@ const Chat = () => {
     }, []);
 
     useEffect(() => {
-        if (!stompClient || !isConnected) return;
+        console.log("렌더링 후 chatRooms 상태:", chatRooms);
+    }, [chatRooms]);
 
-        getUnreadMessage();
-        let subscription = stompClient.subscribe("/user/queue/unreadCount", (message) => {
-            const updatedRoom = JSON.parse(message.body);
-            console.log(updatedRoom)
-            console.log(chatRooms)
-            setChatRooms((prevRooms) =>
-                prevRooms.map((room) =>
-                    room.chatRoomId === updatedRoom.chatRoomNo
-                        ? { ...room, unreadCount: updatedRoom.unreadCount }
-                        : room
-                )
-            )
-        });
-
-        return () => {
-            subscription.unsubscribe();
-        };
-    }, [stompClient, userInfo, setChatRooms]);
 
     useEffect(() => {
         if (currentChatRoomId) {
@@ -65,8 +49,40 @@ const Chat = () => {
     }, [currentChatRoomId, chatRooms]);
 
     useEffect(() => {
+        if (!stompClient || !stompClient.connected) return;
 
-    }, [stompClient, isConnected]);
+
+        let subscription = stompClient.subscribe(`/sub/chat/update/${userInfo?.username}`, (message) => {
+            const updatedRoom = JSON.parse(message.body);
+            setChatRooms(updatedRoom);
+        });
+        stompClient.publish({
+            destination: "/pub/unread",
+            body: JSON.stringify({ userId: userInfo?.id }),
+        });
+
+        let subscription2 = stompClient.subscribe(`/queue/unreadCount/${userInfo?.username}`, (message) => {
+            const unreadCounts = JSON.parse(message.body);
+            console.log(unreadCounts)
+
+            setChatRooms((prevRooms) => {
+                return prevRooms.map((room) => {
+                    const unreadData = unreadCounts.find((unread: any) => unread.chatRoomId === room.chatRoomId);
+
+                    if (unreadData) {
+                        return { ...room, unreadCount: unreadData.unreadCount };
+                    }
+                    console.log(room)
+                    return room;
+                });
+            });
+        });
+
+        return () => {
+            subscription.unsubscribe();
+            subscription2.unsubscribe();
+        };
+    }, [stompClient, stompClient?.connected]);
 
     const openCreateModal = () => {
         setIsCreateModalOpen(true);
@@ -165,7 +181,6 @@ const Chat = () => {
                                                         <div className="msg-room-list" id="chatRoomList">
                                                             <ChatRoomList
                                                                 chatRooms={chatRooms}
-                                                                setChatRooms={setChatRooms}
                                                                 currentChatRoomId={currentChatRoomId}
                                                                 subscribeToParticipants={subscribeToParticipants}
                                                                 updateUnreadMessageCounts={updateUnreadMessageCounts}

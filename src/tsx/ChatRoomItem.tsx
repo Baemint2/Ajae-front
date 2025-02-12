@@ -29,7 +29,6 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
             setCurrentChatRoomId(chatRoom.chatRoomId);
             subscribeToParticipants(chatRoom.chatRoomId);
             updateUnreadMessageCounts();
-            chatRoom.unreadCount = 0;
         }
     };
 
@@ -60,7 +59,7 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
 
             {/* 안 읽은 메시지 카운트 */}
             <div className="unread-count-badge"
-                 style={{display: chatRoom.unreadCount === 0 ? "none" : "flex"}}
+                 style={{display: chatRoom.unreadCount === 0 || chatRoom.unreadCount === undefined ? "none" : "flex"}}
             >{chatRoom.unreadCount}</div>
         </div>
     );

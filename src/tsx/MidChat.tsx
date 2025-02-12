@@ -113,11 +113,12 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
             const newMsg = {
                 msgId: Date.now(),
                 userId: userInfo.id,
+                username: userInfo.username,
                 creator: userInfo.username || "Unknown",
                 msgContent: message,
                 msgDt: new Date().toISOString(),
                 msgStat: 0,
-                chatRoomNo: currentChatRoomId!,
+                chatRoomId: currentChatRoomId!,
             };
             // setMessages((prevMessages) => [...prevMessages, newMsg]);
             stompClient.publish({
@@ -147,7 +148,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
 
     const getChatMessages = async (chatRoomNo: number | undefined) => {
         const body = {
-            chatRoomNo: chatRoomNo,
+            chatRoomId: chatRoomNo,
             userId: userInfo.id
         }
         const response = await fetch("http://localhost:8090/message/get", {
