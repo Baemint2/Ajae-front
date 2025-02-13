@@ -9,7 +9,6 @@ import CreateChatRoomModal from "./CreateChatRoomModal";
 import MidChat from "./MidChat";
 import {useStomp} from "./StompContext";
 
-
 interface IChatRoomInfo {
     chatRoomId: number;
     chatRoomTitle?: string;
@@ -29,7 +28,7 @@ const Chat = () => {
     const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
-    const { stompClient, isConnected } = useStomp();
+    const { stompClient } = useStomp();
 
     useEffect(() => {
         setIsLoading(true)
@@ -39,7 +38,6 @@ const Chat = () => {
     useEffect(() => {
         console.log("렌더링 후 chatRooms 상태:", chatRooms);
     }, [chatRooms]);
-
 
     useEffect(() => {
         if (currentChatRoomId) {
@@ -148,14 +146,6 @@ const Chat = () => {
         }
     };
 
-
-    const subscribeToParticipants = (chatRoomNo: number) => {
-        console.log("Subscribing to room:", chatRoomNo);
-    };
-    const updateUnreadMessageCounts = () => {
-        console.log("Updating unread messages");
-    };
-
     return (
         <div>
             <div className="crispy-container">
@@ -182,8 +172,6 @@ const Chat = () => {
                                                             <ChatRoomList
                                                                 chatRooms={chatRooms}
                                                                 currentChatRoomId={currentChatRoomId}
-                                                                subscribeToParticipants={subscribeToParticipants}
-                                                                updateUnreadMessageCounts={updateUnreadMessageCounts}
                                                                 setCurrentChatRoomId={setCurrentChatRoomId}
                                                                 isLoading={isLoading}
                                                                 userInfo={userInfo}

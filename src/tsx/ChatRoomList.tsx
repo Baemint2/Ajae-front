@@ -5,8 +5,6 @@ import {UserInfo} from "./interface/userTypes";
 
 interface ChatRoomListProps {
     chatRooms: ChatRoom[],
-    subscribeToParticipants: (chatRoomId: number) => void,
-    updateUnreadMessageCounts: () => void,
     currentChatRoomId: number | null;
     setCurrentChatRoomId: (chatRoomId: number | null) => void,
     isLoading: boolean
@@ -15,8 +13,6 @@ interface ChatRoomListProps {
 
 const ChatRoomList: React.FC<ChatRoomListProps> = ({
                                                        chatRooms,
-                                                       subscribeToParticipants,
-                                                       updateUnreadMessageCounts,
                                                        currentChatRoomId,
                                                        setCurrentChatRoomId,
                                                        isLoading,
@@ -30,8 +26,6 @@ const ChatRoomList: React.FC<ChatRoomListProps> = ({
                 chatRoom={room}
                 currentChatRoomId={currentChatRoomId}
                 setCurrentChatRoomId={setCurrentChatRoomId}
-                subscribeToParticipants={subscribeToParticipants}
-                updateUnreadMessageCounts={updateUnreadMessageCounts}
                 userInfo={userInfo}
             />
         ))

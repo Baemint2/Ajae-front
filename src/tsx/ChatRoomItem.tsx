@@ -2,14 +2,12 @@ import React, {useEffect, useState} from "react";
 import {ChatRoom} from "./interface/chatRoomTypes";
 import Anonymous from "../img/anonymous.png"
 import {UserInfo} from "./interface/userTypes";
-import {useStomp} from "./StompContext";
+import {useBeforeUnload} from "react-router-dom";
 
 interface ChatRoomProps {
     chatRoom: ChatRoom;
     currentChatRoomId: number | null;
     setCurrentChatRoomId: (chatRoomId: number | null) => void;
-    subscribeToParticipants: (chatRoomId: number) => void;
-    updateUnreadMessageCounts: () => void;
     userInfo?: UserInfo;
 }
 
@@ -17,20 +15,31 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
                                                    chatRoom,
                                                    currentChatRoomId,
                                                    setCurrentChatRoomId,
-                                                   subscribeToParticipants,
-                                                   updateUnreadMessageCounts,
                                                    userInfo
                                                }) => {
 
     const handleClick = () => {
         if (currentChatRoomId === chatRoom.chatRoomId) {
+            console.log(currentChatRoomId, userInfo?.id)
+            // TODO lastSeenDt 호출
             setCurrentChatRoomId(null);
         } else {
+            console.log(currentChatRoomId)
+            // TODO lastSeenDt 호출
             setCurrentChatRoomId(chatRoom.chatRoomId);
-            subscribeToParticipants(chatRoom.chatRoomId);
-            updateUnreadMessageCounts();
         }
     };
+
+    useBeforeUnload((event) => {
+        console.log("새로고침을 하거나 종료를 합니다.")
+        console.log(currentChatRoomId, userInfo?.id)
+        // TODO lastSeenDt 호출
+        event.preventDefault()
+    })
+
+    useEffect(() => {
+        console.log(chatRoom)
+    }, [chatRoom]);
 
     const join = () => {
         return chatRoom.participantUsers.map(user => user.nickname).join(", ");
@@ -59,7 +68,7 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
 
             {/* 안 읽은 메시지 카운트 */}
             <div className="unread-count-badge"
-                 style={{display: chatRoom.unreadCount === 0 || chatRoom.unreadCount === undefined ? "none" : "flex"}}
+                 style={{display: chatRoom.unreadCount === 0 || chatRoom.unreadCount === null ? "none" : "flex"}}
             >{chatRoom.unreadCount}</div>
         </div>
     );
