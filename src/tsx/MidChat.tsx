@@ -110,14 +110,11 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
     const sendMessage = () => {
         console.log("메시지 전송");
         if (stompClient?.connected) {
+
             const newMsg = {
-                msgId: Date.now(),
                 userId: userInfo.id,
-                username: userInfo.username,
                 creator: userInfo.username || "Unknown",
                 msgContent: message,
-                msgDt: new Date().toISOString(),
-                msgStat: 0,
                 chatRoomId: currentChatRoomId!,
             };
             // setMessages((prevMessages) => [...prevMessages, newMsg]);

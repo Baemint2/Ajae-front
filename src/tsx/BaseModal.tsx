@@ -33,7 +33,6 @@ const BaseModal: React.FC<BaseModalProps> = ({
                                                  userInfo}) => {
     const [users, setUsers] = useState<IUser[]>([]);   // 사용자 목록
     const [modalType, setModalType] = useState<string>()
-    const [loginUser, setLoginUser] = useState<UserInfo>()
     const [inviteUsers, setInviteUsers] = useState<Set<string>>(new Set())
     const [inviteUserInput, setInviteUserInput] = useState<string>("")
 
@@ -54,7 +53,6 @@ const BaseModal: React.FC<BaseModalProps> = ({
             setModalType("invite")
         } else {
             setModalType("create")
-            setLoginUser(userInfo)
         }
     }, [isOpen, modalTitle]);
 
@@ -132,7 +130,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
 
         const body = {
             creator: username,
-            usernameList: [loginUser?.nickname, ...inviteUsers],
+            usernameList: [userInfo?.nickname, ...inviteUsers],
         }
 
         const response = await fetch(`http://localhost:8090/chatRoom`, {
