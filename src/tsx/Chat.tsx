@@ -1,13 +1,16 @@
 import "../css/chat.css"
 import write from "../img/write.png"
 import messageImg from "../img/message.png"
-import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import ChatRoomList from "./ChatRoomList";
 import {useUser} from "./UserContext";
 import { UserInfo } from "./interface/userTypes";
 import CreateChatRoomModal from "./CreateChatRoomModal";
 import MidChat from "./MidChat";
 import {useStomp} from "./StompContext";
+import {useBeforeUnload} from "react-router-dom";
+import {getChatRoom, updateLastSeenDt} from "./api/chatRoom/chatRoom";
+import {getUserInfo} from "./api/userInfo/userInfo";
 
 interface IChatRoomInfo {
     chatRoomId: number;
@@ -24,15 +27,27 @@ const Chat = () => {
     const [userInfo, setUserInfo] = useState<UserInfo>();
     const [chatRooms, setChatRooms] = useState<IChatRoomInfo[]>([]);
     const [chatRoomInfo, setChatRoomInfo] = useState<IChatRoomInfo>();
-    const {setUser} = useUser();
     const [currentChatRoomId, setCurrentChatRoomId] = useState<number | null>(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const { stompClient } = useStomp();
 
     useEffect(() => {
-        setIsLoading(true)
-        getUserInfo();
+        const fetchUserInfo = async () => {
+            setIsLoading(true)
+            const userInfo = await getUserInfo();
+
+            if (userInfo) {
+                setUserInfo(userInfo.second)
+                const chatRoom = await getChatRoom(userInfo.second.username);
+                setChatRooms(chatRoom);
+            }
+
+            setTimeout(() => {
+                setIsLoading(false)
+            }, 100)
+        }
+        fetchUserInfo();
     }, []);
 
     useEffect(() => {
@@ -82,6 +97,12 @@ const Chat = () => {
         };
     }, [stompClient, stompClient?.connected]);
 
+    useBeforeUnload(() => {
+        if (currentChatRoomId !== null) {
+            updateLastSeenDt(currentChatRoomId, userInfo?.id);
+        }
+    })
+
     const openCreateModal = () => {
         setIsCreateModalOpen(true);
     }
@@ -89,49 +110,6 @@ const Chat = () => {
     const closeCreateModal = () => {
         setIsCreateModalOpen(false);
     }
-
-    const getUserInfo = () => {
-        const getCookie = (name: String) => {
-            const cookies = document.cookie.split("; ");
-            for (let cookie of cookies) {
-                const [key, value] = cookie.split("=");
-                if (key === name) return value;
-            }
-            return null;
-        };
-        try {
-            fetch(`http://localhost:8090/userInfo/${getCookie("username")}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }).then((response) => {
-               return response.json();
-            }).then((data: any) => {
-                setUser(data);
-                console.log(data);
-                setUserInfo(data.second); // 사용자 정보 설정
-                return getChatRoom(data.second.username);
-            })
-        } catch (error) {
-            console.error("사용자 정보 가져오기 오류:", error);
-        } finally {
-
-            setTimeout(() => {
-                setIsLoading(false)
-            }, 100)
-
-        }
-    };
-
-    const getChatRoom = async (username: String) => {
-        const response = await fetch(`http://localhost:8090/chatRoom/${username}`, {
-            method: 'GET',
-            headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await response.json();
-        setChatRooms(data.chatRoom);
-    };
 
     return (
         <div>
@@ -188,6 +166,7 @@ const Chat = () => {
 
 
                                             <MidChat currentChatRoomId={currentChatRoomId}
+                                                     setCurrentChatRoomId={setCurrentChatRoomId}
                                                      setChatRooms={setChatRooms}
                                                      chatRoomInfo={chatRoomInfo}
                                                      userInfo={userInfo!}

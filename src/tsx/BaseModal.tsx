@@ -133,7 +133,7 @@ const BaseModal: React.FC<BaseModalProps> = ({
             usernameList: [userInfo?.nickname, ...inviteUsers],
         }
 
-        const response = await fetch(`http://localhost:8090/chatRoom`, {
+        const response = await fetch(`http://localhost:8090/chat-room`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"

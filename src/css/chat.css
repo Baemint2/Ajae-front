@@ -849,3 +849,12 @@ main {
         transform: rotate(360deg);
     }
 }
+
+.chat-room-item {
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.fade-out {
+    opacity: 0;
+    transform: translateX(-20px);
+}

@@ -8,6 +8,7 @@ import { UserInfo } from "./interface/userTypes";
 import { Message } from "./interface/msgTypes";
 import InviteModal from "./InviteModal";
 import {useStomp} from "./StompContext";
+import {getChatMessages, leaveChatRoom} from "./api/chatRoom/chatRoom";
 
 interface IChatRoomInfo {
     chatRoomId: number;
@@ -22,10 +23,11 @@ interface MidChatProps {
     currentChatRoomId: number | null
     chatRoomInfo?: IChatRoomInfo
     userInfo: UserInfo
+    setCurrentChatRoomId: (chatRoomId: number | null) => void,
     setChatRooms: React.Dispatch<React.SetStateAction<IChatRoomInfo[]>>
 }
 
-const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userInfo, setChatRooms}) => {
+const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userInfo, setCurrentChatRoomId, setChatRooms}) => {
     const { stompClient, isConnected } = useStomp();
     const rightSidebarRef = useRef<HTMLDivElement>(null);
     const midChatRef = useRef<HTMLDivElement>(null);
@@ -34,6 +36,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [isInviteModalOpen, setIsInviteModalOpen] = useState<boolean>(false);
+    const [isLeaving, setIsLeaving] = useState<boolean>(false)
 
     useEffect(() => {
         if (!stompClient || !isConnected || !currentChatRoomId) return;
@@ -59,11 +62,21 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
     useEffect(() => {
         if (currentChatRoomId === null) {
             toggleSideBar();
-
         } else {
-            getChatMessages(currentChatRoomId);
+            const fetchMessages = async () => {
+                const chatMessages = await getChatMessages(currentChatRoomId, userInfo?.id);
+                setMessages(chatMessages);
+            };
+
+            if (currentChatRoomId && userInfo?.id) {
+                fetchMessages();
+            }
         }
     }, [currentChatRoomId]);
+
+    useEffect(() => {
+
+    }, []);
 
     useLayoutEffect(() => {
         if (chatContainerRef.current) {
@@ -72,6 +85,20 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
             });
         }
     }, [currentChatRoomId, messages]);
+
+    const handleLeaveRoom = async () => {
+        if (!currentChatRoomId) return;
+
+        setIsLeaving(true);
+
+        leaveChatRoom(currentChatRoomId, userInfo?.id);
+
+        setChatRooms((prevRooms) => prevRooms.filter(room => room.chatRoomId !== currentChatRoomId));
+
+        setIsLeaving(false);
+        setCurrentChatRoomId(null); // 선택된 채팅방 해제
+    };
+
 
 
     const toggleSideBar = () => {
@@ -102,7 +129,6 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                 msgContent: message,
                 chatRoomId: currentChatRoomId!,
             };
-            // setMessages((prevMessages) => [...prevMessages, newMsg]);
             stompClient.publish({
                 destination: "/pub/chat/message",
                 body: JSON.stringify(newMsg),
@@ -128,24 +154,6 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
         }
     }
 
-    const getChatMessages = async (chatRoomNo: number | undefined) => {
-        const body = {
-            chatRoomId: chatRoomNo,
-            userId: userInfo.id
-        }
-        const response = await fetch("http://localhost:8090/message/get", {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/JSON'
-            },
-            body: JSON.stringify(body)
-        });
-
-        const data = await response.json();
-        console.log(data.message);
-        setMessages(data.message);
-    }
-
     const join = () => {
         return chatRoomInfo?.participantUsers.map(user => user.nickname).join(", ");
     }
@@ -158,7 +166,8 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
         setIsInviteModalOpen(false);
     }
 
-        return (
+
+    return (
         <>
             <div className="mid-chat" ref={midChatRef}
                  style={{display: currentChatRoomId ? "flex" : "none"}}>
@@ -234,7 +243,7 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                 <div className="chat-room-wrap">
                     <div className="intro">
                         <div>
-                            <div className="leave-chat-room" id="leave-room">
+                            <div className={`chat-room-item ${isLeaving ? "fade-out" : ""}`} id="leave-room" onClick={handleLeaveRoom}>
                                 <i className="fa-solid fa-arrow-right-from-bracket"></i>
                                 나가기
                             </div>
