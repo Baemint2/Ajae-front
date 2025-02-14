@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect } from "react";
 import {ChatRoom} from "./interface/chatRoomTypes";
 import Anonymous from "../img/anonymous.png"
 import {UserInfo} from "./interface/userTypes";
@@ -21,28 +21,47 @@ const ChatRoomItem: React.FC<ChatRoomProps> = ({
     const handleClick = () => {
         if (currentChatRoomId === chatRoom.chatRoomId) {
             console.log(currentChatRoomId, userInfo?.id)
-            // TODO lastSeenDt 호출
+            updateLastSeenDt()
             setCurrentChatRoomId(null);
         } else {
-            console.log(currentChatRoomId)
-            // TODO lastSeenDt 호출
+            if (currentChatRoomId !== null) {
+                updateLastSeenDt()
+            }
+            chatRoom.unreadCount = 0;
             setCurrentChatRoomId(chatRoom.chatRoomId);
         }
     };
 
     useBeforeUnload((event) => {
-        console.log("새로고침을 하거나 종료를 합니다.")
-        console.log(currentChatRoomId, userInfo?.id)
-        // TODO lastSeenDt 호출
-        event.preventDefault()
+        updateLastSeenDt();
     })
 
     useEffect(() => {
-        console.log(chatRoom)
-    }, [chatRoom]);
+        if (currentChatRoomId !== null) {
+            console.log("반갑읍니다")
+            console.log(chatRoom)
+        }
+
+    }, [currentChatRoomId]);
 
     const join = () => {
         return chatRoom.participantUsers.map(user => user.nickname).join(", ");
+    }
+
+    const updateLastSeenDt = () => {
+        const body = {
+            chatRoomId: currentChatRoomId,
+            userId: userInfo?.id
+        }
+        fetch('http://localhost:8090/chatRoom/last-seen-update', {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        }).then(response => {
+            return response
+        })
     }
 
     return (
