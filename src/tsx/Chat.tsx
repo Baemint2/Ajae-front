@@ -133,19 +133,6 @@ const Chat = () => {
         setChatRooms(data.chatRoom);
     };
 
-
-    const getUnreadMessage = () => {
-        if (stompClient?.connected) {
-
-            stompClient.publish({
-                destination: "/pub/unread",
-                body: JSON.stringify({ userId: userInfo?.id }),
-            });
-        } else {
-            console.error("연결 안됨");
-        }
-    };
-
     return (
         <div>
             <div className="crispy-container">

@@ -52,21 +52,6 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
         };
     }, [stompClient, isConnected, currentChatRoomId]);
 
-
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            if (stompClient && stompClient.connected && currentChatRoomId) {
-                console.log("30초마다 동작합니다.")
-                stompClient.publish({
-                    destination: "/pub/chat/access-update",
-                    body: JSON.stringify({ userId: userInfo.id, chatRoomId: currentChatRoomId })
-                });
-            }
-        }, 30000); // 30초마다 업데이트
-        return () => clearInterval(interval);
-    }, [stompClient, currentChatRoomId, userInfo]);
-
     const deleteMessage = () => {
         console.log("메시지 삭제")
     }
@@ -249,14 +234,6 @@ const MidChat: React.FC<MidChatProps> = ({currentChatRoomId, chatRoomInfo, userI
                 <div className="chat-room-wrap">
                     <div className="intro">
                         <div>
-                            <div className="notify-on">
-                                <i className="fa-solid fa-bell"></i>
-                                알림켜기
-                            </div>
-                            <div className="notify-off">
-                                <i className="fa-solid fa-bell-slash"></i>
-                                알림끄기
-                            </div>
                             <div className="leave-chat-room" id="leave-room">
                                 <i className="fa-solid fa-arrow-right-from-bracket"></i>
                                 나가기
